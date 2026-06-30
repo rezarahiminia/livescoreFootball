@@ -257,13 +257,28 @@ module.exports = (app) => {
                 return res.status(400).json({ error: 'Invalid signature' });
             }
             
+            // Validate id fields are plain strings before querying.
+            // Mongo/Mongoose treats nested objects (e.g. {"$ne": null}) as
+            // operator expressions, which would let an attacker turn the
+            // findOne below into a "match anything" query and mark an
+            // arbitrary donation as paid (CWE-943, NoSQL injection).
+            const paymentIdRaw = payload.payment_id;
+            const orderIdRaw   = payload.order_id;
+            const paymentId = (typeof paymentIdRaw === 'string') ? paymentIdRaw : null;
+            const orderId   = (typeof orderIdRaw   === 'string') ? orderIdRaw   : null;
+
+            if (!paymentId && !orderId) {
+                console.error('❌ IPN missing string payment_id/order_id');
+                return res.status(400).json({ error: 'Invalid payload' });
+            }
+
+            // Build a filter that only contains the ids that are valid strings.
+            const orClauses = [];
+            if (paymentId) orClauses.push({ payment_id: paymentId });
+            if (orderId)   orClauses.push({ order_id:   orderId   });
+
             // Find and update donation
-            const donation = await Donation.findOne({ 
-                $or: [
-                    { payment_id: payload.payment_id },
-                    { order_id: payload.order_id }
-                ]
-            });
+            const donation = await Donation.findOne({ $or: orClauses });
             
             if (!donation) {
                 console.error('❌ Donation not found:', payload.order_id);
