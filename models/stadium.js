@@ -40,6 +40,9 @@ const StadiumSchema = new mongoose.Schema({
     region: {
         type: String
     },
+    timezone: {
+        type: String
+    },
     createdAt: {
         type: Date,
         default: Date.now
