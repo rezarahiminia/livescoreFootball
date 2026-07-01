@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const { DateTime } = require('luxon');
 
 const Group = require('../models/group');
 const Team = require('../models/team');
@@ -36,6 +37,37 @@ async function getTeamsMap() {
     teamsCache = teamMap;
     teamsCacheTime = now;
     return teamMap;
+}
+
+// Cache for stadiums (static data)
+let stadiumsCache = null;
+let stadiumsCacheTime = 0;
+
+async function getStadiumsMap() {
+    const now = Date.now();
+    if (stadiumsCache && (now - stadiumsCacheTime) < CACHE_TTL) {
+        return stadiumsCache;
+    }
+
+    const stadiums = await Stadium.find({}, 'id timezone').lean();
+    const stadiumMap = {};
+    stadiums.forEach(stadium => {
+        stadiumMap[stadium.id] = stadium.timezone;
+    });
+
+    stadiumsCache = stadiumMap;
+    stadiumsCacheTime = now;
+    return stadiumMap;
+}
+
+// Convert a game's local_date ("MM/DD/YYYY HH:mm" in the stadium's local time)
+// to a UTC ISO string using the stadium's IANA timezone.
+function toUtcDate(localDate, timezone) {
+    if (!localDate || !timezone) {
+        return null;
+    }
+    const dt = DateTime.fromFormat(localDate, 'MM/dd/yyyy HH:mm', { zone: timezone });
+    return dt.isValid ? dt.toUTC().toISO() : null;
 }
 
 // Group Get Routes
@@ -337,6 +369,11 @@ router.get('/teams', async(req,res) => {
  *                           away_team_name_fa:
  *                             type: string
  *                             description: Away team Persian name
+ *                           utc_date:
+ *                             type: string
+ *                             format: date-time
+ *                             nullable: true
+ *                             description: Kickoff time in UTC (ISO 8601), derived from local_date and the stadium timezone
  *       400:
  *         description: Error getting games
  *         content:
@@ -354,21 +391,26 @@ router.get('/games', async(req,res) => {
         // Use lean() for faster queries
         const games = await Game.find({}).lean();
 
-        // Get team map from cache
-        const teamMap = await getTeamsMap();
+        // Get team and stadium maps from cache
+        const [teamMap, stadiumMap] = await Promise.all([
+            getTeamsMap(),
+            getStadiumsMap()
+        ]);
 
-        // Add team names to games
+        // Add team names and UTC date to games
         const gamesWithNames = games.map(game => {
             if(game.home_team_id && teamMap[game.home_team_id]) {
                 game.home_team_name_en = teamMap[game.home_team_id].name_en;
                 game.home_team_name_fa = teamMap[game.home_team_id].name_fa;
             }
-            
+
             if(game.away_team_id && teamMap[game.away_team_id]) {
                 game.away_team_name_en = teamMap[game.away_team_id].name_en;
                 game.away_team_name_fa = teamMap[game.away_team_id].name_fa;
             }
-            
+
+            game.utc_date = toUtcDate(game.local_date, stadiumMap[game.stadium_id]);
+
             return game;
         });
 
@@ -406,7 +448,15 @@ router.get('/games', async(req,res) => {
  *               type: object
  *               properties:
  *                 game:
- *                   $ref: '#/components/schemas/Game'
+ *                   allOf:
+ *                     - $ref: '#/components/schemas/Game'
+ *                     - type: object
+ *                       properties:
+ *                         utc_date:
+ *                           type: string
+ *                           format: date-time
+ *                           nullable: true
+ *                           description: Kickoff time in UTC (ISO 8601), derived from local_date and the stadium timezone
  *       400:
  *         description: Error getting game
  *         content:
@@ -425,6 +475,8 @@ router.get('/game/:idGame', async(req,res) => {
 
         const game = await Game.findById(id).lean();
         if (game) {
+            const stadiumMap = await getStadiumsMap();
+            game.utc_date = toUtcDate(game.local_date, stadiumMap[game.stadium_id]);
             gameCache.set(id, { data: game, time: now });
         }
 
