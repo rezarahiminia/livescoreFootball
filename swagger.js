@@ -131,11 +131,11 @@ const options = {
             },
             home_score: {
               type: 'string',
-              description: 'Home team score'
+              description: 'Home team score after regulation or extra time. Never includes penalty shootout goals (see home_penalties)'
             },
             away_score: {
               type: 'string',
-              description: 'Away team score'
+              description: 'Away team score after regulation or extra time. Never includes penalty shootout goals (see away_penalties)'
             },
             home_scorers: {
               type: 'string',
@@ -144,6 +144,18 @@ const options = {
             away_scorers: {
               type: 'string',
               description: 'Away team scorers list or null string'
+            },
+            home_penalties: {
+              type: 'string',
+              description: 'Knockout matches only — group matches never carry this field. Home team converted penalties in a shootout; "null" or absent when the match was not decided by a shootout'
+            },
+            away_penalties: {
+              type: 'string',
+              description: 'Knockout matches only — group matches never carry this field. Away team converted penalties in a shootout; "null" or absent when the match was not decided by a shootout'
+            },
+            extra_time: {
+              type: 'string',
+              description: 'Knockout matches only — group matches never carry this field. TRUE when the match went beyond 90 minutes, FALSE or absent otherwise'
             },
             group: {
               type: 'string',

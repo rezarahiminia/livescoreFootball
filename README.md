@@ -611,6 +611,37 @@ The `type` field identifies the stage of each match. For knockout matches before
 | `third` | 3RD   | 8 | Match for third place | 1 | 103 |
 | `final` | FINAL | 9 | Final | 1 | 104 |
 
+##### Knockout Results: Extra Time & Penalty Shootouts
+
+Knockout matches that are level after 90 minutes go to extra time and, if still level, to a penalty shootout. The API represents these outcomes as follows:
+
+| Field | Meaning |
+|-------|---------|
+| `home_score` / `away_score` | Score after regulation or extra time. **Never includes penalty shootout goals.** A finished knockout match with a level score was decided by a shootout. |
+| `home_penalties` / `away_penalties` | Knockout matches only. Converted penalties in the shootout. `"null"` (or the field being absent on older documents) means the match was not decided by a shootout. Group matches never carry these fields. |
+| `extra_time` | Knockout matches only. `"TRUE"` when the match went beyond 90 minutes, `"FALSE"` or absent otherwise. |
+
+**Response Example (Knockout Match decided by penalty shootout):**
+```json
+{
+  "game": {
+    "id": "89",
+    "home_score": "1",
+    "away_score": "1",
+    "home_penalties": "4",
+    "away_penalties": "2",
+    "extra_time": "TRUE",
+    "finished": "TRUE",
+    "time_elapsed": "finished",
+    "type": "r16"
+  }
+}
+```
+
+In this example the match ended 1–1 after extra time and the home team won the shootout 4–2. Consumers deriving a winner should treat `home_penalties` / `away_penalties` as the tie-breaker whenever the score is level on a finished knockout match.
+
+> **Compatibility note:** the new fields are strictly additive. Existing consumers that only read `home_score` / `away_score` keep working unchanged; documents written before this change simply do not carry the new fields.
+
 **Knockout Stage Schedule:**
 
 | Stage | Dates | Venues |

@@ -64,6 +64,11 @@ async function importMatches() {
                 away_score: item.away_score,
                 home_scorers: item.home_scorers,
                 away_scorers: item.away_scorers,
+                // Knockout-only fields; undefined for group matches, so the
+                // paths stay unset on group documents.
+                home_penalties: item.home_penalties,
+                away_penalties: item.away_penalties,
+                extra_time: item.extra_time,
                 group: item.group,
                 matchday: item.matchday,
                 local_date: item.local_date,

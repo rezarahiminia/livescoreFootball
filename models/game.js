@@ -42,6 +42,22 @@ const GameSchema = new mongoose.Schema({
         type: String,
         default: "null"
     },
+    // Knockout matches only; group matches never carry these fields.
+    // home_score / away_score always hold the score after regulation or
+    // extra time; a penalty shootout is reported here and never folded
+    // into the score fields. "null" or absent means the match was not
+    // decided by a shootout.
+    home_penalties: {
+        type: String
+    },
+    away_penalties: {
+        type: String
+    },
+    // "TRUE" when the match went beyond 90 minutes. "FALSE"/absent means
+    // it was decided in regulation time. Knockout matches only.
+    extra_time: {
+        type: String
+    },
     group: {
         type: String
     },
