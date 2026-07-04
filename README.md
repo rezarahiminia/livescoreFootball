@@ -838,6 +838,8 @@ This API is completely **free and open-source**. If you find it useful, consider
 
 ---
 
+<a href="https://buymeacoffee.com/rahiminia" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50"></a>
+
 ## �📧 Contact & Support
 
 For questions, issues, or suggestions, please open an issue on GitHub.
