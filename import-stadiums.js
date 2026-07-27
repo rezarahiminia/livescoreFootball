@@ -35,7 +35,8 @@ async function importStadiums() {
                 country_en: item.country_en,
                 country_fa: item.country_fa,
                 capacity: item.capacity,
-                region: item.region
+                region: item.region,
+                timezone: item.timezone
             };
             
             console.log(`Creating stadium ${stadiumData.name_en}...`);

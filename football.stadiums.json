@@ -10,7 +10,8 @@
     "country_en": "Mexico",
     "country_fa": "مکزیک",
     "capacity": 83000,
-    "region": "Central"
+    "region": "Central",
+    "timezone": "America/Mexico_City"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f002" },
@@ -23,7 +24,8 @@
     "country_en": "Mexico",
     "country_fa": "مکزیک",
     "capacity": 48000,
-    "region": "Central"
+    "region": "Central",
+    "timezone": "America/Mexico_City"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f003" },
@@ -36,7 +38,8 @@
     "country_en": "Mexico",
     "country_fa": "مکزیک",
     "capacity": 53500,
-    "region": "Central"
+    "region": "Central",
+    "timezone": "America/Monterrey"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f004" },
@@ -49,7 +52,8 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 94000,
-    "region": "Central"
+    "region": "Central",
+    "timezone": "America/Chicago"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f005" },
@@ -62,7 +66,8 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 72000,
-    "region": "Central"
+    "region": "Central",
+    "timezone": "America/Chicago"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f006" },
@@ -75,7 +80,8 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 73000,
-    "region": "Central"
+    "region": "Central",
+    "timezone": "America/Chicago"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f007" },
@@ -88,7 +94,8 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 75000,
-    "region": "Eastern"
+    "region": "Eastern",
+    "timezone": "America/New_York"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f008" },
@@ -101,7 +108,8 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 65000,
-    "region": "Eastern"
+    "region": "Eastern",
+    "timezone": "America/New_York"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f009" },
@@ -114,7 +122,8 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 65000,
-    "region": "Eastern"
+    "region": "Eastern",
+    "timezone": "America/New_York"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f010" },
@@ -127,7 +136,8 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 69000,
-    "region": "Eastern"
+    "region": "Eastern",
+    "timezone": "America/New_York"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f011" },
@@ -140,7 +150,8 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 82500,
-    "region": "Eastern"
+    "region": "Eastern",
+    "timezone": "America/New_York"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f012" },
@@ -153,7 +164,8 @@
     "country_en": "Canada",
     "country_fa": "کانادا",
     "capacity": 45000,
-    "region": "Eastern"
+    "region": "Eastern",
+    "timezone": "America/Toronto"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f013" },
@@ -166,7 +178,8 @@
     "country_en": "Canada",
     "country_fa": "کانادا",
     "capacity": 54000,
-    "region": "Western"
+    "region": "Western",
+    "timezone": "America/Vancouver"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f014" },
@@ -179,7 +192,8 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 69000,
-    "region": "Western"
+    "region": "Western",
+    "timezone": "America/Los_Angeles"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f015" },
@@ -192,7 +206,8 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 71000,
-    "region": "Western"
+    "region": "Western",
+    "timezone": "America/Los_Angeles"
   },
   {
     "_id": { "$oid": "679c9c8a5749c4077500f016" },
@@ -205,6 +220,7 @@
     "country_en": "United States",
     "country_fa": "آمریکا",
     "capacity": 70000,
-    "region": "Western"
+    "region": "Western",
+    "timezone": "America/Los_Angeles"
   }
 ]
