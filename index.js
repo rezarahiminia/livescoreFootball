@@ -3,13 +3,12 @@ const { loadEnvConfig, config } = require('./config/env');
 const nodeEnv = loadEnvConfig();
 
 const express = require('express');
-const bodyParser = require('body-parser');
+const path = require('path');
 const morgan = require('morgan');
 const rateLimit = require('express-rate-limit');
 const compression = require('compression');
 const helmet = require('helmet');
 const cors = require('cors');
-const createResponseCache = require('./middleware/responseCache');
 
 // Catch unhandled errors
 process.on('uncaughtException', (err) => {
@@ -51,25 +50,12 @@ if (config.ENABLE_SWAGGER) {
 // CORS - public read endpoints must be reachable from browsers on other origins
 const corsOrigins = config.getCorsOrigins();
 const publicCorsOptions = {
-    origin: '*',
+    origin: corsOrigins,
     methods: ['GET', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    allowedHeaders: ['Content-Type', 'Accept'],
     credentials: false
 };
-const privateCorsOptions = {
-    origin: corsOrigins,
-    methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
-    credentials: true
-};
-
-app.use((req, res, next) => {
-    if (req.path.startsWith('/get')) {
-        return cors(publicCorsOptions)(req, res, next);
-    }
-
-    return cors(privateCorsOptions)(req, res, next);
-});
+app.use(cors(publicCorsOptions));
 
 // Security middleware
 app.use(helmet({
@@ -135,110 +121,69 @@ if (config.LOG_LEVEL === 'debug') {
 console.log(`🌍 Environment: ${config.NODE_ENV}`);
 console.log(`📊 Rate Limit: ${config.RATE_LIMIT_MAX} req/${config.RATE_LIMIT_WINDOW}ms`);
 console.log(`📊 Public /get Rate Limit: ${config.PUBLIC_RATE_LIMIT_MAX} req/${config.PUBLIC_RATE_LIMIT_WINDOW}ms`);
-console.log(`🧠 Public /get Cache: ${config.PUBLIC_CACHE_TTL}ms, max ${config.PUBLIC_CACHE_MAX_ITEMS} items`);
 console.log(`🔗 CORS Origin: ${typeof corsOrigins === 'string' ? corsOrigins : corsOrigins.join(', ')}`);
 
-app.use(bodyParser.urlencoded({ extended: false }));
-const path = require('path');
+app.use(express.urlencoded({ extended: false }));
+app.use(express.json({ limit: '10kb' }));
 
-app.use(bodyParser.json({ limit: '10kb' })); // Limit body size
-
-app.use('/get', createResponseCache({
-    ttlMs: config.PUBLIC_CACHE_TTL,
-    maxItems: config.PUBLIC_CACHE_MAX_ITEMS,
-    shouldCache: (req) => req.method === 'GET'
+app.use('/assets', express.static(path.join(__dirname, 'public'), {
+    index: false,
+    maxAge: config.isProd ? '1h' : 0
 }));
-
-// Dynamic sitemap - must be before static files middleware
-require('./controllers/seoController')(app);
-
-// Serve static files (UI)
-app.use(express.static(path.join(__dirname, 'public')));
 
 // Swagger Documentation
 if (swaggerUi && specs) {
-    app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs, {
+    app.get('/openapi.json', (req, res) => {
+        res.set('Cache-Control', 'no-store, max-age=0');
+        return res.json(specs);
+    });
+    app.use('/api-docs', (req, res, next) => {
+        res.set('Cache-Control', 'no-store, max-age=0');
+        next();
+    }, swaggerUi.serve, swaggerUi.setup(null, {
         customCss: '.swagger-ui .topbar { display: none }',
-        customSiteTitle: 'FIFA World Cup 2026 API Documentation'
+        customSiteTitle: 'Soccer Clubs Data API Documentation',
+        swaggerOptions: {
+            url: '/openapi.json',
+            displayRequestDuration: true,
+            persistAuthorization: false
+        }
     }));
     console.log('📚 Swagger UI available at /api-docs');
 } else {
     console.log('⚠️ Swagger NOT mounted! swaggerUi:', !!swaggerUi, 'specs:', !!specs);
 }
 
-/**
- * @swagger
- * /:
- *   get:
- *     summary: Welcome endpoint
- *     description: Returns API welcome message
- *     tags: [General]
- *     security: []
- *     responses:
- *       200:
- *         description: Welcome message
- *         content:
- *           application/json:
- *             schema:
- *               type: object
- *               properties:
- *                 message:
- *                   type: string
- *                   example: Welcome to FIFA World Cup 2026 API
- */
-// Serve UI for root path - with server-side language detection for SEO
-const fs = require('fs');
 app.get('/', (req, res) => {
-    const lang = req.query.lang;
-    if (lang === 'en') {
-        try {
-            let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf8');
-            html = html
-                .replace('<html lang="fa" dir="rtl">', '<html lang="en" dir="ltr">')
-                .replace(
-                    /<title[^>]*>.*?<\/title>/,
-                    '<title id="page-title">FIFA World Cup 2026 | Live Scores, Schedule, Free API &amp; Group Standings</title>'
-                )
-                .replace(
-                    /<meta name="description"[^>]*>/,
-                    '<meta name="description" id="meta-description" content="FIFA World Cup 2026 live scores, match schedule &amp; free REST API. Track 48 teams, 104 matches in real-time. Free World Cup data API \u2014 groups, standings, fixtures, teams. USA, Canada &amp; Mexico.">'
-                )
-                .replace(
-                    /<meta name="keywords"[^>]*>/,
-                    '<meta name="keywords" id="meta-keywords" content="FIFA World Cup 2026, World Cup 2026 schedule, World Cup 2026 live score, World Cup 2026 live results, World Cup 2026 groups, World Cup 2026 standings, World Cup 2026 fixtures, World Cup 2026 teams, free football API, free soccer API, World Cup API free, FIFA 2026 API, live score API, free sports API, football data API, sports API 2026, World Cup 2026 bracket, WC2026, soccer 2026, football 2026, 2026 World Cup">'
-                )
-                .replace(
-                    /<meta property="og:title"[^>]*>/,
-                    '<meta property="og:title" id="og-title" content="FIFA World Cup 2026 | Live Scores, Schedule, Free API &amp; Group Standings">'
-                )
-                .replace(
-                    /<meta property="og:description"[^>]*>/,
-                    '<meta property="og:description" id="og-description" content="FIFA World Cup 2026 live scores, match schedule &amp; free REST API. Track 48 teams, 104 matches in real-time. USA, Canada &amp; Mexico.">'
-                )
-                .replace(
-                    /<meta property="og:locale" content="fa_IR">/,
-                    '<meta property="og:locale" content="en_US">'
-                )
-                .replace(
-                    /<meta name="twitter:title"[^>]*>/,
-                    '<meta name="twitter:title" id="twitter-title" content="FIFA World Cup 2026 | Live Scores, Schedule, Free API &amp; Group Standings">'
-                )
-                .replace(
-                    /<meta name="twitter:description"[^>]*>/,
-                    '<meta name="twitter:description" id="twitter-description" content="FIFA World Cup 2026 live scores, match schedule &amp; free REST API. Track 48 teams, 104 matches in real-time.">'
-                )
-                .replace(
-                    /<link rel="canonical"[^>]*>/,
-                    '<link rel="canonical" href="https://worldcup26.ir/?lang=en">'
-                );
-            res.setHeader('Content-Type', 'text/html; charset=utf-8');
-            res.setHeader('Cache-Control', 'public, max-age=300');
-            return res.send(html);
-        } catch (err) {
-            console.error('Error serving English HTML:', err.message);
+    res.set('Cache-Control', 'no-cache, max-age=0');
+    return res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
+
+app.get('/service-info.json', (req, res) => {
+    res.set('Cache-Control', 'public, max-age=300');
+    res.json({
+        name: 'Soccer Clubs Data API',
+        version: require('./package.json').version,
+        dataSource: 'MongoDB',
+        upstreamCalls: false,
+        documentation: '/api-docs/',
+        openapi: '/openapi.json',
+        businessContext: '/business-context.md',
+        coverage: '/get/soccer/meta',
+        endpoints: {
+            leagues: '/get/soccer/leagues',
+            scoreboard: '/get/soccer/{league}/scoreboard',
+            clubs: '/get/soccer/{league}/clubs',
+            standings: '/get/soccer/{league}/standings',
+            matchSummary: '/get/soccer/{league}/summary?event={eventId}'
         }
-    }
-    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+    });
+});
+
+app.get('/business-context.md', (req, res) => {
+    res.type('text/markdown');
+    res.set('Cache-Control', 'public, max-age=300');
+    return res.sendFile(path.join(__dirname, 'BUSINESS-CONTEXT.md'));
 });
 
 require('./controllers/index')(app);

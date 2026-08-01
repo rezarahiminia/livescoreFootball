@@ -5,281 +5,228 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'FIFA World Cup 2026 API',
-      version: '1.0.4',
-      description: 'Complete REST API for FIFA World Cup 2026 - United States, Mexico & Canada',
-      contact: {
-        name: 'API Support',
-        email: 'support@worldcup2026.com'
-      },
+      title: 'Soccer Clubs Data API',
+      version: '2.0.0',
+      description: 'Customer-facing, database-backed football API for competition discovery, club catalogs, fixtures, live score snapshots, match summaries, play-by-play, rosters, and standings. Customer requests never call the upstream provider directly. Use GET /get/soccer/meta to inspect current database coverage.',
       license: {
         name: 'ISC',
         url: 'https://opensource.org/licenses/ISC'
       }
     },
+    externalDocs: {
+      description: 'Business context, product boundaries, capability status, and AI contributor rules',
+      url: `${String(process.env.API_URL || 'http://localhost:3050').replace(/\/$/, '')}/business-context.md`
+    },
     servers: [
       {
-        url: 'http://localhost:3050',
-        description: 'Development server'
+        url: process.env.API_URL || 'http://localhost:3050',
+        description: process.env.API_URL ? 'Configured server' : 'Development server'
+      }
+    ],
+    tags: [
+      {
+        name: 'Soccer Data',
+        description: 'Multi-league club data read from MongoDB'
       },
       {
-        url: 'http://worldcup26.ir:3050',
-        description: 'Production server'
-      },
-      {
-        url: 'https://worldcup26.ir',
-        description: 'Production server (HTTPS)'
+        name: 'Health',
+        description: 'Service and database health'
       }
     ],
     components: {
-      securitySchemes: {
-        bearerAuth: {
-          type: 'http',
-          scheme: 'bearer',
-          bearerFormat: 'JWT',
-          description: 'Enter JWT token'
-        }
-      },
       schemas: {
-        User: {
+        Error: {
           type: 'object',
-          required: ['name', 'email', 'password'],
           properties: {
-            name: {
-              type: 'string',
-              description: 'User full name'
-            },
-            email: {
-              type: 'string',
-              format: 'email',
-              description: 'User email address'
-            },
-            password: {
-              type: 'string',
-              format: 'password',
-              description: 'User password (min 6 characters)'
-            }
+            error: { type: 'string' }
           }
         },
-        Group: {
+        League: {
           type: 'object',
           properties: {
-            _id: {
-              type: 'string',
-              description: 'Group ID'
-            },
-            name: {
-              type: 'string',
-              description: 'Group name (A-L)'
-            },
-            winner: {
-              type: 'string',
-              description: 'Winner team'
-            },
-            runnerUp: {
-              type: 'string',
-              description: 'Runner-up team'
-            }
+            id: { type: 'string' },
+            name: { type: 'string' },
+            abbreviation: { type: 'string' },
+            slug: { type: 'string', example: 'eng.1' },
+            country: { type: 'string', example: 'England' },
+            kind: { type: 'string', enum: ['club', 'international'] },
+            logo: { type: 'string' },
+            active: { type: 'boolean' },
+            lastSyncedAt: { type: 'string', format: 'date-time', nullable: true },
+            coverage: { $ref: '#/components/schemas/Coverage' }
           }
         },
-        Team: {
+        Coverage: {
           type: 'object',
+          required: ['matches', 'clubs', 'dedicatedClubs', 'standingsGroups', 'hasData'],
           properties: {
-            _id: {
-              type: 'string',
-              description: 'Team ID'
-            },
-            name: {
-              type: 'string',
-              description: 'Team name'
-            },
-            flag: {
-              type: 'string',
-              description: 'Team flag URL'
-            },
-            group: {
-              type: 'string',
-              description: 'Group reference ID'
-            },
-            games: {
-              type: 'array',
-              items: {
-                type: 'string'
-              },
-              description: 'Array of game IDs'
-            }
+            matches: { type: 'integer', minimum: 0 },
+            clubs: { type: 'integer', minimum: 0, description: 'Best available club count, including match-derived participants' },
+            dedicatedClubs: { type: 'integer', minimum: 0, description: 'Full documents stored in soccer_clubs' },
+            standingsGroups: { type: 'integer', minimum: 0 },
+            hasData: { type: 'boolean' }
           }
         },
-        Game: {
+        Club: {
           type: 'object',
           properties: {
-            _id: {
-              type: 'string',
-              description: 'MongoDB document ID'
+            id: { type: 'string' },
+            name: { type: 'string' },
+            displayName: { type: 'string' },
+            shortDisplayName: { type: 'string' },
+            abbreviation: { type: 'string' },
+            country: { type: 'string' },
+            city: { type: 'string' },
+            logo: { type: 'string' },
+            color: { type: 'string' },
+            foundedYear: { type: 'integer', nullable: true },
+            venue: { type: 'object', nullable: true },
+            isActive: { type: 'boolean' },
+            catalogSource: { type: 'string', enum: ['club-catalog', 'match-snapshot'] }
+          }
+        },
+        ServiceMeta: {
+          type: 'object',
+          properties: {
+            service: { type: 'object' },
+            coverage: {
+              type: 'object',
+              properties: {
+                competitions: { type: 'integer' },
+                activeClubCompetitions: { type: 'integer' },
+                activeInternationalCompetitions: { type: 'integer' },
+                competitionsWithMatches: { type: 'integer' },
+                dedicatedClubDocuments: { type: 'integer' },
+                matches: { type: 'integer' },
+                playByPlayEvents: { type: 'integer' },
+                standingsGroups: { type: 'integer' }
+              }
             },
-            id: {
-              type: 'string',
-              description: 'Public match ID (1-104)'
-            },
-            home_team_id: {
-              type: 'string',
-              description: 'Home team public ID'
-            },
-            away_team_id: {
-              type: 'string',
-              description: 'Away team public ID'
-            },
-            home_score: {
-              type: 'string',
-              description: 'Home team score'
-            },
-            away_score: {
-              type: 'string',
-              description: 'Away team score'
-            },
-            home_scorers: {
-              type: 'string',
-              description: 'Home team scorers list or null string'
-            },
-            away_scorers: {
-              type: 'string',
-              description: 'Away team scorers list or null string'
-            },
-            group: {
-              type: 'string',
-              description: 'Group/stage code (A-L, R32, R16, QF, SF, 3RD, FINAL)'
-            },
-            matchday: {
-              type: 'string',
-              description: 'Matchday number as string'
-            },
-            local_date: {
-              type: 'string',
-              description: 'Local date in MM/DD/YYYY HH:mm format'
-            },
-            persian_date: {
-              type: 'string',
-              description: 'Persian calendar date/time'
-            },
-            stadium_id: {
-              type: 'string',
-              description: 'Stadium public ID'
-            },
-            date: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Parsed game date/time (ISO)'
-            },
-            finished: {
-              type: 'string',
-              description: 'Match finished status (e.g. FALSE/TRUE)'
-            },
-            time_elapsed: {
-              type: 'string',
-              description: 'Match clock status (e.g. notstarted, 45, HT, FT)'
-            },
+            features: { type: 'array', items: { type: 'string' } },
+            lastSuccessfulSyncAt: { type: 'string', format: 'date-time', nullable: true },
+            generatedAt: { type: 'string', format: 'date-time' }
+          }
+        },
+        MatchStatus: {
+          type: 'object',
+          properties: {
+            clock: { type: 'number' },
+            displayClock: { type: 'string' },
+            period: { type: 'integer' },
             type: {
-              type: 'string',
-              description: 'Tournament stage type (group, r32, r16, qf, sf, third, final)'
-            },
-            home_team_label: {
-              type: 'string',
-              description: 'Placeholder label for knockout home side'
-            },
-            away_team_label: {
-              type: 'string',
-              description: 'Placeholder label for knockout away side'
-            },
-            homeTeam: {
-              type: 'string',
-              description: 'Internal MongoDB ObjectId reference to home team'
-            },
-            visitingTeam: {
-              type: 'string',
-              description: 'Internal MongoDB ObjectId reference to away team'
-            },
-            createdAt: {
-              type: 'string',
-              format: 'date-time',
-              description: 'Creation timestamp'
-            }
-          }
-        },
-        MatchTable: {
-          type: 'object',
-          properties: {
-            _id: {
-              type: 'string',
-              description: 'Match table ID'
-            },
-            group: {
-              type: 'string',
-              description: 'Group name (A-L)'
-            },
-            teams: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  team_id: {
-                    type: 'string',
-                    description: 'Team ID'
-                  },
-                  mp: {
-                    type: 'number',
-                    description: 'Matches played'
-                  },
-                  w: {
-                    type: 'number',
-                    description: 'Wins'
-                  },
-                  d: {
-                    type: 'number',
-                    description: 'Draws'
-                  },
-                  l: {
-                    type: 'number',
-                    description: 'Losses'
-                  },
-                  gf: {
-                    type: 'number',
-                    description: 'Goals for'
-                  },
-                  ga: {
-                    type: 'number',
-                    description: 'Goals against'
-                  },
-                  gd: {
-                    type: 'number',
-                    description: 'Goal difference'
-                  },
-                  pts: {
-                    type: 'number',
-                    description: 'Points'
-                  }
-                }
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                state: { type: 'string', enum: ['pre', 'in', 'post', 'unknown'] },
+                completed: { type: 'boolean' },
+                description: { type: 'string' },
+                detail: { type: 'string' },
+                shortDetail: { type: 'string' }
               }
             }
           }
         },
-        Error: {
+        MatchDataAvailability: {
+          type: 'object',
+          description: 'Storage-backed match features and intentionally unavailable league-wide data',
+          properties: {
+            timeline: {
+              type: 'object',
+              properties: {
+                available: { type: 'boolean', example: true },
+                storedIn: { type: 'string', example: 'soccer_match_events' }
+              }
+            },
+            matchGoals: {
+              type: 'object',
+              properties: {
+                available: { type: 'boolean', example: true },
+                storedIn: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  example: ['soccer_match_events', 'soccer_matches.key_events']
+                }
+              }
+            },
+            statisticsAndSummary: {
+              type: 'object',
+              properties: {
+                available: { type: 'boolean', example: true },
+                storedIn: { type: 'string', example: 'soccer_matches' }
+              }
+            },
+            leagueTopScorers: {
+              type: 'object',
+              properties: {
+                available: { type: 'boolean', example: false },
+                reason: { type: 'string' }
+              }
+            }
+          }
+        },
+        MatchSummary: {
+          type: 'object',
+          description: 'Stored match summary with score, teams, statistics, key events, and data availability',
+          properties: {
+            header: { type: 'object' },
+            boxscore: { type: 'object' },
+            keyEvents: {
+              type: 'array',
+              description: 'Goals, cards, and other important events; goal items have scoringPlay=true and may include athletesInvolved',
+              items: { type: 'object' }
+            },
+            rosters: { type: 'array', items: { type: 'object' } },
+            gameInfo: { type: 'object' },
+            commentary: { type: 'array', items: { type: 'object' } },
+            meta: {
+              type: 'object',
+              properties: {
+                dataSource: { type: 'string', example: 'database' },
+                provider: { type: 'string', example: 'upstream' },
+                lastSyncedAt: { type: 'string', format: 'date-time', nullable: true },
+                dataAvailability: { $ref: '#/components/schemas/MatchDataAvailability' }
+              }
+            }
+          }
+        },
+        MatchPlay: {
           type: 'object',
           properties: {
-            error: {
-              type: 'string',
-              description: 'Error message'
+            id: { type: 'string' },
+            type: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                text: { type: 'string', example: 'Goal' },
+                type: { type: 'string', example: 'goal' }
+              }
+            },
+            text: { type: 'string' },
+            period: { type: 'object' },
+            clock: { type: 'object' },
+            scoringPlay: { type: 'boolean' },
+            scoreValue: { type: 'number' },
+            redCard: { type: 'boolean' },
+            yellowCard: { type: 'boolean' },
+            penaltyKick: { type: 'boolean' },
+            ownGoal: { type: 'boolean' },
+            substitution: { type: 'boolean' },
+            team: { type: 'object', nullable: true },
+            athletesInvolved: { type: 'array', items: { type: 'object' } },
+            participants: {
+              type: 'array',
+              description: 'Players involved in an event; substitution events normally contain the incoming and outgoing players',
+              items: { type: 'object' }
             }
           }
         }
       }
-    },
-    security: [
-      {
-        bearerAuth: []
-      }
-    ]
+    }
   },
-  apis: ['./controllers/*.js', './index.js']
+  apis: [
+    './controllers/soccerController.js',
+    './controllers/healthController.js'
+  ]
 };
 
 const specs = swaggerJsdoc(options);

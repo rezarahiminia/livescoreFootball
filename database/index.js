@@ -15,7 +15,7 @@ const MONGODB_CONFIG = isProd ? {
         socketTimeoutMS: 45000,
     }
 } : {
-    url: process.env.MONGODB_URL || 'mongodb://localhost:27017/worldcup2026',
+    url: process.env.MONGODB_URL || 'mongodb://localhost:27017/soccer',
     options: {
         useNewUrlParser: true,
         useUnifiedTopology: true,

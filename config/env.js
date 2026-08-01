@@ -42,12 +42,7 @@ function loadEnvConfig() {
     FRONTEND_URL: process.env.FRONTEND_URL || `http://localhost:${process.env.PORT || 3050}`,
 
     // دیتابیس
-    MONGODB_URL: process.env.MONGODB_URL || 'mongodb://localhost:27017/worldcup2026',
-
-    // امنیت
-    JWT_SECRET: process.env.JWT_SECRET || 'worldcup2026_dev_secret_key',
-    SECRET: process.env.SECRET || 'worldcup2026_secret',
-    ACCESSCODEDEV: process.env.ACCESSCODEDEV || 'devcode123',
+    MONGODB_URL: process.env.MONGODB_URL || 'mongodb://localhost:27017/soccer',
 
     // Rate Limiting
     RATE_LIMIT_WINDOW: parseInt(process.env.RATE_LIMIT_WINDOW || process.env.RATE_LIMIT_WINDOW_MS) || 60000,
@@ -55,18 +50,8 @@ function loadEnvConfig() {
     PUBLIC_RATE_LIMIT_WINDOW: parseInt(process.env.PUBLIC_RATE_LIMIT_WINDOW || process.env.PUBLIC_RATE_LIMIT_WINDOW_MS) || 60000,
     PUBLIC_RATE_LIMIT_MAX: parseInt(process.env.PUBLIC_RATE_LIMIT_MAX) || 120,
 
-    // In-memory response cache for public GET endpoints
-    PUBLIC_CACHE_TTL: parseInt(process.env.PUBLIC_CACHE_TTL || process.env.PUBLIC_CACHE_TTL_MS) || 30000,
-    PUBLIC_CACHE_MAX_ITEMS: parseInt(process.env.PUBLIC_CACHE_MAX_ITEMS) || 1000,
-
     // CORS
     CORS_ORIGINS: process.env.CORS_ORIGINS || '*',
-
-    // NOWPayments
-    NOWPAYMENTS_API_KEY: process.env.NOWPAYMENTS_API_KEY || '',
-    NOWPAYMENTS_IPN_SECRET: process.env.NOWPAYMENTS_IPN_SECRET || '',
-    NOWPAYMENTS_PUBLIC_KEY: process.env.NOWPAYMENTS_PUBLIC_KEY || '',
-    DONATION_WALLET_ADDRESS: process.env.DONATION_WALLET_ADDRESS || '',
 
     // Logging
     LOG_LEVEL: process.env.LOG_LEVEL || (NODE_ENV === 'production' ? 'error' : 'debug'),

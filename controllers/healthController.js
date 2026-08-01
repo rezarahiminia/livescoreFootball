@@ -30,7 +30,7 @@ module.exports = (app) => {
      *                   description: Server uptime in seconds
      *                 version:
      *                   type: string
-     *                   example: 1.0.5
+     *                   example: 2.0.0
      *                 database:
      *                   type: object
      *                   properties:
