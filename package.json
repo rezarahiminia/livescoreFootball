@@ -1,7 +1,7 @@
 {
   "name": "soccer-clubs-data-api",
   "version": "2.0.0",
-  "description": "Database-backed REST API for multi-league club football scores, fixtures, standings, clubs, and match events.",
+  "description": "Free open-source football API for live scores, fixtures, results, standings and match events across the Premier League, LaLiga and more leagues.",
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
@@ -38,10 +38,25 @@
     "football-fixtures",
     "football-data",
     "soccer-data",
-    "open-source"
+    "open-source",
+    "premier-league-api",
+    "la-liga-api",
+    "football-live-scores-today",
+    "football-results",
+    "football-schedule",
+    "football-api-github",
+    "json-football-api"
   ],
   "author": "jp2435",
   "license": "ISC",
+  "homepage": "https://worldcup26.ir",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rezarahiminia/worldcup2026.git"
+  },
+  "bugs": {
+    "url": "https://github.com/rezarahiminia/worldcup2026/issues"
+  },
   "dependencies": {
     "compression": "^1.8.1",
     "cors": "^2.8.6",

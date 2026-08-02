@@ -1,6 +1,12 @@
-# Soccer Clubs Data API
+# Free Football Live Scores API — Premier League, LaLiga & More
 
-A database-backed REST API for club football leagues, fixtures, live scores, match summaries, play-by-play events, clubs, rosters, and standings.
+An open-source, database-backed REST API and web score center for football live scores, today's fixtures, results, league tables, match summaries, play-by-play events, clubs and rosters.
+
+**Live football score center:** [worldcup26.ir](https://worldcup26.ir/)
+
+**Interactive football API docs:** [worldcup26.ir/api-docs](https://worldcup26.ir/api-docs/)
+
+Current verified coverage focuses on England and Spain, including the Premier League, EFL competitions, FA Cup, LaLiga, LaLiga 2, Copa del Rey and women's competitions. UEFA Champions League and additional countries are added only after their data coverage is verified.
 
 The public API never calls an upstream provider during a customer request. A separate listener project fetches upstream data and writes normalized documents to MongoDB; this service only reads and publishes those documents.
 
@@ -14,6 +20,21 @@ markets, followed by country-by-country expansion.
 |---|---|---|
 | 1 | Launch England and Spain, starting with the Premier League (`eng.1`) and LaLiga (`esp.1`) | First priority |
 | 2 | Add leagues from other countries one country at a time | Planned |
+
+## Search-friendly competition pages
+
+The website serves crawlable, server-rendered landing pages with unique titles,
+descriptions, canonical URLs, structured data and internal links:
+
+- `/football/eng.1` — Premier League live scores, fixtures, results and table
+- `/football/esp.1` — LaLiga live scores, fixtures, results and standings
+- `/football/country/england` — all verified England football competitions
+- `/football/country/spain` — all verified Spain football competitions
+
+The XML sitemap discovers every active league automatically, so newly verified
+countries and competitions receive an indexable page without hard-coding new
+routes. The full keyword map and publishing rules are in
+[SEO-KEYWORDS.md](SEO-KEYWORDS.md).
 
 ## Rollout strategy
 

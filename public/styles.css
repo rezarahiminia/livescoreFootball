@@ -201,6 +201,45 @@ h1 em { color: var(--green); font-style: normal; }
 .service-flow span { padding: 10px 13px; border: 1px solid var(--line); border-radius: 11px; background: rgba(7,16,29,.5); font: 700 9px ui-monospace, SFMono-Regular, Menlo, monospace; }
 .service-flow i { color: var(--green); font-style: normal; }
 
+.noscript-note { margin: -42px auto 54px; padding: 13px 16px; border: 1px solid rgba(255,200,106,.25); border-radius: 13px; color: var(--amber); background: rgba(255,200,106,.06); font-size: 11px; }
+.seo-directory { margin-bottom: 72px; padding: 36px 38px; border: 1px solid var(--line); border-radius: var(--radius-xl); background: rgba(9,23,38,.58); }
+.seo-section-heading { max-width: 840px; }
+.seo-section-heading h2 { margin: 0; font-size: clamp(25px, 3vw, 36px); line-height: 1.25; letter-spacing: -.8px; }
+.seo-section-heading > p:last-child { margin: 13px 0 0; color: var(--muted); font-size: 13px; }
+.country-links { margin: 25px 0 0; display: flex; flex-wrap: wrap; gap: 9px; }
+.country-links a, .seo-home-link { padding: 8px 12px; border: 1px solid var(--line); border-radius: 999px; color: #dce8f2; background: rgba(104,168,255,.05); font-size: 10px; font-weight: 700; }
+.country-links a:hover, .seo-home-link:hover { border-color: var(--green); color: var(--green); }
+.competition-grid { margin-top: 25px; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+.competition-link { min-width: 0; padding: 17px; border: 1px solid var(--line); border-radius: 16px; background: rgba(255,255,255,.018); transition: transform .18s ease, border-color .18s ease, background .18s ease; }
+.competition-link:hover { transform: translateY(-2px); border-color: rgba(84,224,161,.4); background: rgba(84,224,161,.035); }
+.competition-link > span { color: var(--green); font-size: 8px; font-weight: 800; letter-spacing: .5px; text-transform: uppercase; }
+.competition-link h3 { margin: 6px 0 3px; overflow: hidden; font-size: 13px; text-overflow: ellipsis; white-space: nowrap; }
+.competition-link p { margin: 0; color: var(--muted); font-size: 9px; }
+.seo-topics { margin-top: 31px; padding-top: 28px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; border-top: 1px solid var(--line); }
+.seo-topics h2, .related-competitions > h2 { margin: 0 0 8px; font-size: 15px; }
+.seo-topics p { margin: 0; color: var(--muted); font-size: 10px; }
+.seo-topics a { color: var(--green); text-decoration: underline; text-underline-offset: 3px; }
+.breadcrumbs { margin-bottom: 22px; display: flex; flex-wrap: wrap; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; }
+.breadcrumbs a:hover { color: var(--green); }
+.breadcrumbs span:last-child { color: var(--ink); }
+.seo-facts { margin: 26px 0 0; display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); overflow: hidden; border: 1px solid var(--line); border-radius: 16px; }
+.seo-facts > div { min-width: 0; padding: 14px 16px; border-left: 1px solid var(--line); }
+.seo-facts > div:first-child { border-left: 0; }
+.seo-facts dt { color: var(--muted); font-size: 8px; text-transform: uppercase; }
+.seo-facts dd { margin: 4px 0 0; overflow: hidden; font-size: 11px; font-weight: 800; text-overflow: ellipsis; white-space: nowrap; }
+.seo-match-columns { margin-top: 28px; display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.seo-match-block { min-width: 0; }
+.seo-match-block h3 { margin: 0 0 10px; font-size: 13px; }
+.seo-match-list { margin: 0; padding: 0; display: grid; gap: 7px; list-style: none; }
+.seo-match-list li { padding: 11px 13px; display: grid; grid-template-columns: minmax(0,1fr) auto; gap: 3px 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.016); }
+.seo-match-list span { overflow: hidden; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.seo-match-list time { grid-column: 1; color: var(--muted); font-size: 8px; }
+.seo-match-list b { grid-column: 2; grid-row: 1 / 3; align-self: center; color: var(--green); font: 700 9px ui-monospace, SFMono-Regular, Menlo, monospace; }
+.related-competitions { margin-top: 34px; padding-top: 27px; border-top: 1px solid var(--line); }
+.related-competitions .competition-grid { grid-template-columns: repeat(4, minmax(0,1fr)); }
+.seo-disclaimer { margin: 25px 0 0; padding: 12px 15px; border-radius: 12px; color: var(--muted); background: rgba(104,168,255,.05); font-size: 9px; }
+.seo-empty { margin: 24px 0 0; color: var(--muted); font-size: 11px; }
+
 footer { border-top: 1px solid var(--line); background: rgba(5,13,23,.55); }
 .footer-row { min-height: 100px; display: flex; align-items: center; justify-content: space-between; gap: 25px; }
 .footer-row > div:first-child { display: grid; }
@@ -280,6 +319,7 @@ footer { border-top: 1px solid var(--line); background: rgba(5,13,23,.55); }
     .data-panel { padding-inline: 24px; }
     .service-intro { grid-template-columns: 1fr; }
     .service-flow { justify-content: flex-start; }
+    .competition-grid, .related-competitions .competition-grid { grid-template-columns: repeat(3, minmax(0,1fr)); }
 }
 
 @media (max-width: 760px) {
@@ -307,6 +347,14 @@ footer { border-top: 1px solid var(--line); background: rgba(5,13,23,.55); }
     .availability-grid { grid-template-columns: 1fr; }
     .substitution-row { grid-template-columns: 1fr auto; }
     .substitution-team { grid-column: 1 / -1; }
+    .seo-directory { padding: 28px 23px; border-radius: 22px; }
+    .competition-grid, .related-competitions .competition-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .seo-topics { grid-template-columns: 1fr; gap: 18px; }
+    .seo-facts { grid-template-columns: 1fr 1fr; }
+    .seo-facts > div { border-left: 0; border-top: 1px solid var(--line); }
+    .seo-facts > div:nth-child(-n+2) { border-top: 0; }
+    .seo-facts > div:nth-child(even) { border-left: 1px solid var(--line); }
+    .seo-match-columns { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 520px) {
@@ -331,6 +379,8 @@ footer { border-top: 1px solid var(--line); background: rgba(5,13,23,.55); }
     .service-intro { padding: 27px 22px; }
     .service-flow i { display: none; }
     .footer-row { padding-block: 25px; align-items: flex-start; flex-direction: column; }
+    .footer-row > div:last-child { flex-wrap: wrap; }
+    .competition-grid, .related-competitions .competition-grid { grid-template-columns: 1fr; }
     .match-dialog { width: calc(100% - 12px); max-height: calc(100vh - 12px); border-radius: 19px; }
     .dialog-shell { max-height: calc(100vh - 12px); }
     .dialog-content { padding: 16px 12px; }

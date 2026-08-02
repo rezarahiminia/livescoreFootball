@@ -166,8 +166,11 @@
         }
         elements['country-select'].disabled = false;
 
-        const requestedSlug = new URLSearchParams(location.search).get('league');
+        const requestedSlug = document.body.dataset.leagueSlug
+            || new URLSearchParams(location.search).get('league');
+        const requestedCountry = document.body.dataset.country;
         const preferredLeague = state.leagues.find(item => item.slug === requestedSlug)
+            || state.leagues.find(item => requestedCountry && item.country === requestedCountry)
             || state.leagues.find(item => item.slug === 'esp.1')
             || state.leagues[0];
 
@@ -228,7 +231,6 @@
         elements['league-dashboard'].hidden = false;
         elements['dashboard-country'].textContent = localCountryName(league.country);
         elements['dashboard-title'].textContent = league.name;
-        history.replaceState(null, '', `${location.pathname}?league=${encodeURIComponent(league.slug)}`);
 
         await Promise.allSettled([loadFixtures(), loadStandings()]);
     }
@@ -600,7 +602,10 @@
 
     function bindEvents() {
         elements['country-select'].addEventListener('change', () => populateLeagues());
-        elements['league-select'].addEventListener('change', event => selectLeague(event.target.value));
+        elements['league-select'].addEventListener('change', event => {
+            const slug = event.target.value;
+            if (slug) window.location.assign(`/football/${encodeURIComponent(slug)}`);
+        });
         elements['refresh-button'].addEventListener('click', () => Promise.allSettled([loadFixtures(), loadStandings(), loadMeta()]));
         elements['apply-fixture-filter'].addEventListener('click', () => loadFixtures());
         elements['fixtures-load-more'].addEventListener('click', () => loadFixtures({ append: true }));

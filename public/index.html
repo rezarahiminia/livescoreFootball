@@ -3,41 +3,30 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Football Live Scores, Fixtures and League Standings | Soccer Clubs Data</title>
-    <meta name="description" content="Choose a country and football league to explore fixtures, live scores, completed results, match details and league standings powered by the Soccer Clubs Data API.">
-    <meta name="keywords" content="football live scores, football fixtures, league standings, LaLiga, Premier League, match results, soccer API, club football data">
+    <title>{{SEO_TITLE}}</title>
+    <meta name="description" content="{{SEO_DESCRIPTION}}">
+    <meta name="keywords" content="{{SEO_KEYWORDS}}">
     <meta name="author" content="Soccer Clubs Data API">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="theme-color" content="#07101d">
-    <link rel="stylesheet" href="/assets/styles.css?v=match-details-4">
+    <link rel="canonical" href="{{SEO_CANONICAL}}">
+    <link rel="stylesheet" href="/assets/styles.css?v=seo-pages-1">
 
     <meta property="og:type" content="website">
     <meta property="og:locale" content="en_US">
     <meta property="og:site_name" content="Soccer Clubs Data">
-    <meta property="og:title" content="Football Live Scores, Fixtures and League Standings">
-    <meta property="og:description" content="Choose a country and league to explore schedules, standings, live matches and completed results in one place.">
+    <meta property="og:url" content="{{SEO_CANONICAL}}">
+    <meta property="og:title" content="{{SEO_TITLE}}">
+    <meta property="og:description" content="{{SEO_DESCRIPTION}}">
     <meta name="twitter:card" content="summary">
-    <meta name="twitter:title" content="Soccer Clubs Data">
-    <meta name="twitter:description" content="Football fixtures, live scores, results and standings powered by a documented REST API.">
+    <meta name="twitter:title" content="{{SEO_TITLE}}">
+    <meta name="twitter:description" content="{{SEO_DESCRIPTION}}">
 
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "WebApplication",
-      "name": "Soccer Clubs Data",
-      "applicationCategory": "SportsApplication",
-      "operatingSystem": "Web",
-      "description": "Interactive football competition explorer backed by the Soccer Clubs Data REST API.",
-      "inLanguage": "en",
-      "isAccessibleForFree": true,
-      "provider": {
-        "@type": "Organization",
-        "name": "Soccer Clubs Data API"
-      }
-    }
+    {{SEO_JSON_LD}}
     </script>
 </head>
-<body>
+<body data-page-kind="{{PAGE_KIND}}" data-league-slug="{{LEAGUE_SLUG}}" data-country="{{COUNTRY_NAME}}">
     <header class="site-header">
         <nav class="nav shell" aria-label="Main navigation">
             <a class="brand" href="/" aria-label="Soccer Clubs Data home">
@@ -58,9 +47,9 @@
     <main>
         <section class="hero shell" aria-labelledby="page-title">
             <div class="hero-copy">
-                <p class="overline">Club football data center</p>
-                <h1 id="page-title">Every league. Every match. <em>One view.</em></h1>
-                <p>Choose a country and league to explore fixtures, results, standings and live match details.</p>
+                <p class="overline">{{SEO_OVERLINE}}</p>
+                <h1 id="page-title">{{SEO_HEADING}}</h1>
+                <p>{{SEO_LEDE}}</p>
             </div>
             <div class="hero-numbers" aria-label="Service coverage statistics">
                 <div><strong id="stat-competitions">—</strong><span>Active competitions</span></div>
@@ -171,6 +160,10 @@
             </section>
         </section>
 
+        <noscript><p class="shell noscript-note">JavaScript is required for interactive live updates. League guides, fixtures and SEO content remain available below.</p></noscript>
+
+        {{SEO_CONTENT}}
+
         <section class="service-intro shell" aria-labelledby="service-title">
             <div>
                 <p class="overline">Powered by documented services</p>
@@ -202,11 +195,11 @@
 
     <footer>
         <div class="shell footer-row">
-            <div><strong>Soccer Clubs Data</strong><span>Fixtures, results and club data</span></div>
-            <div><a href="/api-docs/">Swagger UI</a><a href="/openapi.json">OpenAPI JSON</a></div>
+            <div><strong>Soccer Clubs Data</strong><span>Free football scores, fixtures, results and tables</span></div>
+            <div><a href="/#competitions">Football leagues</a><a href="/api-docs/">Football API</a><a href="/openapi.json" rel="nofollow">OpenAPI JSON</a></div>
         </div>
     </footer>
 
-    <script src="/assets/app.js?v=match-details-4" defer></script>
+    <script src="/assets/app.js?v=seo-pages-1" defer></script>
 </body>
 </html>

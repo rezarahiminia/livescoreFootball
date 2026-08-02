@@ -5,9 +5,9 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'Soccer Clubs Data API',
+      title: 'Free Football Live Scores API',
       version: '2.0.0',
-      description: 'Customer-facing, database-backed football API for competition discovery, club catalogs, fixtures, live score snapshots, match summaries, play-by-play, rosters, and standings. Customer requests never call the upstream provider directly. Use GET /get/soccer/meta to inspect current database coverage.',
+      description: 'Open-source JSON football API for Premier League, LaLiga and expanding multi-country coverage. Read fixtures, live score snapshots, results, tables, clubs, match summaries, play-by-play and rosters from a database-backed REST service. Customer requests never call the upstream provider directly. Use GET /get/soccer/meta to inspect current coverage.',
       license: {
         name: 'ISC',
         url: 'https://opensource.org/licenses/ISC'

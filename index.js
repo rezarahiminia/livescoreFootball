@@ -126,6 +126,13 @@ console.log(`🔗 CORS Origin: ${typeof corsOrigins === 'string' ? corsOrigins :
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json({ limit: '10kb' }));
 
+// JSON and health endpoints are useful to clients but should not compete with
+// the human-facing league pages in search results.
+app.use(['/get', '/health', '/api/health', '/openapi.json', '/service-info.json'], (req, res, next) => {
+    res.set('X-Robots-Tag', 'noindex, nofollow');
+    next();
+});
+
 app.use('/assets', express.static(path.join(__dirname, 'public'), {
     index: false,
     maxAge: config.isProd ? '1h' : 0
@@ -142,7 +149,7 @@ if (swaggerUi && specs) {
         next();
     }, swaggerUi.serve, swaggerUi.setup(null, {
         customCss: '.swagger-ui .topbar { display: none }',
-        customSiteTitle: 'Soccer Clubs Data API Documentation',
+        customSiteTitle: 'Free Football API Documentation | Soccer Clubs Data',
         swaggerOptions: {
             url: '/openapi.json',
             displayRequestDuration: true,
@@ -153,11 +160,6 @@ if (swaggerUi && specs) {
 } else {
     console.log('⚠️ Swagger NOT mounted! swaggerUi:', !!swaggerUi, 'specs:', !!specs);
 }
-
-app.get('/', (req, res) => {
-    res.set('Cache-Control', 'no-cache, max-age=0');
-    return res.sendFile(path.join(__dirname, 'public', 'index.html'));
-});
 
 app.get('/service-info.json', (req, res) => {
     res.set('Cache-Control', 'public, max-age=300');
