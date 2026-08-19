@@ -1,5 +1,7 @@
 # Free Football Live Scores API — Premier League, LaLiga & More
 
+<a href="https://buymeacoffee.com/rahiminia" target="_blank" rel="noreferrer noopener"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50"></a>
+
 An open-source, database-backed REST API and web score center for football live scores, today's fixtures, results, league tables, match summaries, play-by-play events, clubs and rosters.
 
 **Live football score center:** [worldcup26.ir](https://worldcup26.ir/)
