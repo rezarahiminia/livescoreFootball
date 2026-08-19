@@ -133,9 +133,15 @@ app.use(['/get', '/health', '/api/health', '/openapi.json', '/service-info.json'
     next();
 });
 
+// The HTML file is a server-rendering template, not a public static asset.
+app.get('/assets/index.html', (req, res) => {
+    res.set('X-Robots-Tag', 'noindex, nofollow');
+    return res.status(404).type('text/plain').send('Not found');
+});
+
 app.use('/assets', express.static(path.join(__dirname, 'public'), {
     index: false,
-    maxAge: config.isProd ? '1h' : 0
+    maxAge: config.isProd ? '7d' : 0
 }));
 
 // Swagger Documentation
@@ -149,7 +155,7 @@ if (swaggerUi && specs) {
         next();
     }, swaggerUi.serve, swaggerUi.setup(null, {
         customCss: '.swagger-ui .topbar { display: none }',
-        customSiteTitle: 'Free Football API Documentation | Soccer Clubs Data',
+        customSiteTitle: 'Free Football Live Scores API Documentation',
         swaggerOptions: {
             url: '/openapi.json',
             displayRequestDuration: true,
@@ -164,7 +170,7 @@ if (swaggerUi && specs) {
 app.get('/service-info.json', (req, res) => {
     res.set('Cache-Control', 'public, max-age=300');
     res.json({
-        name: 'Soccer Clubs Data API',
+        name: 'Free Football Live Scores API',
         version: require('./package.json').version,
         dataSource: 'MongoDB',
         upstreamCalls: false,
@@ -200,6 +206,8 @@ app.use((req, res, next) => {
 app.use((error, req, res, next) => {
     console.error(`❌ Error ${error.status || 500}: ${error.message} | ${req.method} ${req.url}`);
     if (error.stack) console.error(error.stack);
+    res.set('X-Robots-Tag', 'noindex, nofollow');
+    res.set('Cache-Control', 'no-store');
     res.status(error.status || 500);
     return res.send({
         error: {

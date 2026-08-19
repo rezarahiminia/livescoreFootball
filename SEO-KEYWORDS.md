@@ -1,6 +1,6 @@
 # SEO keyword map for worldcup26.ir
 
-Last reviewed: 2026-08-02
+Last reviewed: 2026-08-19
 
 This document maps one search intent to one useful page. It deliberately avoids
 keyword stuffing: Google says unique titles, descriptions, crawlable links and
@@ -18,7 +18,7 @@ These broad terms match features that are already live:
 | `football fixtures today` | `/` | Current date, kickoff time and competition |
 | `football results today` | `/` | Completed score and match detail links |
 | `football league tables` / `football standings` | `/` | Links to verified tables by league |
-| `free football API` | `/api-docs/` and GitHub README | JSON examples, limits, freshness, endpoint docs |
+| `free football API` | `/football-api`, `/api-docs/` and GitHub README | JSON examples, limits, freshness, endpoint docs |
 | `free football API GitHub` | GitHub repository | Clear project title, description, topics and examples |
 
 Do not split these into many nearly identical thin pages until the root page has

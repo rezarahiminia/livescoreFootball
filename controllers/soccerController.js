@@ -232,7 +232,7 @@ router.get('/meta', async(req, res) => {
         res.set('Cache-Control', 'public, max-age=60');
         return res.json({
             service: {
-                name: 'Soccer Clubs Data API',
+                name: 'Free Football Live Scores API',
                 version: require('../package.json').version,
                 dataSource: 'MongoDB',
                 upstreamCallsDuringRequest: false

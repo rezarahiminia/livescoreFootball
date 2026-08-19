@@ -11,6 +11,10 @@ const options = {
       license: {
         name: 'ISC',
         url: 'https://opensource.org/licenses/ISC'
+      },
+      contact: {
+        name: 'Free Football Live Scores',
+        url: 'https://github.com/rezarahiminia/livescoreFootball/issues'
       }
     },
     externalDocs: {

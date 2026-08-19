@@ -74,6 +74,22 @@
         }).format(date);
     }
 
+    function isoDateInput(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    function setInitialFixtureWindow() {
+        const from = new Date();
+        const to = new Date();
+        from.setDate(from.getDate() - 3);
+        to.setDate(to.getDate() + 14);
+        elements['date-from'].value = isoDateInput(from);
+        elements['date-to'].value = isoDateInput(to);
+    }
+
     async function fetchJson(path) {
         const response = await fetch(path, { headers: { Accept: 'application/json' } });
         const body = await response.json().catch(() => ({}));
@@ -627,6 +643,7 @@
 
     async function initialize() {
         bindEvents();
+        setInitialFixtureWindow();
         const results = await Promise.allSettled([loadMeta(), loadLeagues()]);
         if (results[1].status === 'rejected') {
             elements['country-select'].replaceChildren(new Option('Unable to load leagues', ''));

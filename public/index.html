@@ -5,16 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>{{SEO_TITLE}}</title>
     <meta name="description" content="{{SEO_DESCRIPTION}}">
-    <meta name="keywords" content="{{SEO_KEYWORDS}}">
-    <meta name="author" content="Soccer Clubs Data API">
-    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="author" content="Free Football Live Scores">
+    <meta name="robots" content="{{SEO_ROBOTS}}">
     <meta name="theme-color" content="#07101d">
     <link rel="canonical" href="{{SEO_CANONICAL}}">
-    <link rel="stylesheet" href="/assets/styles.css?v=seo-pages-1">
+    <link rel="stylesheet" href="/assets/styles.css?v=seo-pages-2">
 
     <meta property="og:type" content="website">
     <meta property="og:locale" content="en_US">
-    <meta property="og:site_name" content="Soccer Clubs Data">
+    <meta property="og:site_name" content="Free Football Live Scores">
     <meta property="og:url" content="{{SEO_CANONICAL}}">
     <meta property="og:title" content="{{SEO_TITLE}}">
     <meta property="og:description" content="{{SEO_DESCRIPTION}}">
@@ -27,24 +26,25 @@
     </script>
 </head>
 <body data-page-kind="{{PAGE_KIND}}" data-league-slug="{{LEAGUE_SLUG}}" data-country="{{COUNTRY_NAME}}">
+    <a class="skip-link" href="#main-content">Skip to football scores</a>
     <header class="site-header">
         <nav class="nav shell" aria-label="Main navigation">
-            <a class="brand" href="/" aria-label="Soccer Clubs Data home">
+            <a class="brand" href="/" aria-label="Free Football Live Scores home">
                 <span class="brand-ball" aria-hidden="true">●</span>
                 <span>
-                    <strong>Soccer Clubs</strong>
-                    <small>DATA CENTER</small>
+                    <strong>Live Football</strong>
+                    <small>SCORES &amp; API</small>
                 </span>
             </a>
             <div class="nav-status" id="service-status">
                 <span class="status-dot"></span>
                 <span>Connecting to service</span>
             </div>
-            <a class="docs-link" href="/api-docs/">API Documentation <span aria-hidden="true">↗</span></a>
+            <div class="nav-actions"><a href="/football-api">Free API</a><a class="docs-link" href="/api-docs/">API Documentation <span aria-hidden="true">↗</span></a></div>
         </nav>
     </header>
 
-    <main>
+    <main id="main-content">
         <section class="hero shell" aria-labelledby="page-title">
             <div class="hero-copy">
                 <p class="overline">{{SEO_OVERLINE}}</p>
@@ -58,6 +58,8 @@
                 <div><strong id="stat-events">—</strong><span>Match events</span></div>
             </div>
         </section>
+
+        {{SEO_CONTENT}}
 
         <section class="explorer shell" aria-label="Choose a league and explore its matches">
             <aside class="filters-panel">
@@ -163,8 +165,6 @@
 
         <noscript><p class="shell noscript-note">JavaScript is required for interactive live updates. League guides, fixtures and SEO content remain available below.</p></noscript>
 
-        {{SEO_CONTENT}}
-
         <section class="service-intro shell" aria-labelledby="service-title">
             <div>
                 <p class="overline">Powered by documented services</p>
@@ -196,11 +196,11 @@
 
     <footer>
         <div class="shell footer-row">
-            <div><strong>Soccer Clubs Data</strong><span>Free football scores, fixtures, results and tables</span></div>
-            <div><a href="/#competitions">Football leagues</a><a href="/api-docs/">Football API</a><a href="/openapi.json" rel="nofollow">OpenAPI JSON</a></div>
+            <div><strong>Free Football Live Scores</strong><span>Live scores, fixtures, results, tables and open football data</span></div>
+            <div><a href="/#today">Scores today</a><a href="/#competitions">Football leagues</a><a href="/football-api">Free football API</a><a href="/api-docs/">API docs</a><a href="https://github.com/rezarahiminia/livescoreFootball">GitHub</a></div>
         </div>
     </footer>
 
-    <script src="/assets/app.js?v=seo-pages-1" defer></script>
+    <script src="/assets/app.js?v=seo-pages-2" defer></script>
 </body>
 </html>

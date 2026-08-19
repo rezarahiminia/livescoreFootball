@@ -6,6 +6,8 @@ An open-source, database-backed REST API and web score center for football live 
 
 **Live football score center:** [worldcup26.ir](https://worldcup26.ir/)
 
+**Free football API guide:** [worldcup26.ir/football-api](https://worldcup26.ir/football-api) — no API key currently required
+
 **Interactive football API docs:** [worldcup26.ir/api-docs](https://worldcup26.ir/api-docs/)
 
 Current verified coverage focuses on England and Spain, including the Premier League, EFL competitions, FA Cup, LaLiga, LaLiga 2, Copa del Rey and women's competitions. UEFA Champions League and additional countries are added only after their data coverage is verified.
@@ -32,6 +34,7 @@ descriptions, canonical URLs, structured data and internal links:
 - `/football/esp.1` — LaLiga live scores, fixtures, results and standings
 - `/football/country/england` — all verified England football competitions
 - `/football/country/spain` — all verified Spain football competitions
+- `/football-api` — free JSON football API guide, examples and documentation
 
 The XML sitemap discovers every active league automatically, so newly verified
 countries and competitions receive an indexable page without hard-coding new
@@ -73,7 +76,7 @@ External listener project
 soccer_* collections
           │  read-only customer requests
           ▼
-Soccer Clubs Data API
+Free Football Live Scores API
 ```
 
 This separation keeps customer traffic independent from upstream availability and lets the listener control polling, retries, normalization, and failover.
@@ -144,7 +147,7 @@ The listener write contract, indexes, schemas, and upsert examples are documente
 
 Requirements:
 
-- Node.js 18 or newer
+- Node.js 20 or newer
 - MongoDB 6 or newer
 
 Install dependencies:

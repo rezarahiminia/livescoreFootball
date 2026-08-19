@@ -25,6 +25,7 @@ const leagues = [{
 }];
 
 const upcomingMatch = {
+    league_slug: 'eng.1',
     date: new Date('2026-08-22T14:00:00.000Z'),
     status: { state: 'pre' },
     home: { display_name: 'Arsenal' },
@@ -53,6 +54,21 @@ const soccerMatchStub = {
     countDocuments() { return Promise.resolve(380); }
 };
 
+const soccerStandingStub = {
+    distinct() { return Promise.resolve(['eng.1', 'esp.1']); },
+    find() {
+        return queryResult([{
+            season_year: 2026,
+            group_name: 'Premier League',
+            entries: [{
+                rank: 1,
+                club: { display_name: 'Arsenal' },
+                stats: { gamesPlayed: 1, goalDifference: 2, points: 3 }
+            }]
+        }]);
+    }
+};
+
 const soccerSyncStateStub = {
     findOne() {
         return queryResult({ last_success_at: new Date('2026-08-02T08:00:00.000Z') });
@@ -61,6 +77,7 @@ const soccerSyncStateStub = {
 
 require.cache[require.resolve('../models/soccerLeague')] = { exports: soccerLeagueStub };
 require.cache[require.resolve('../models/soccerMatch')] = { exports: soccerMatchStub };
+require.cache[require.resolve('../models/soccerStanding')] = { exports: soccerStandingStub };
 require.cache[require.resolve('../models/soccerSyncState')] = { exports: soccerSyncStateStub };
 
 process.env.PUBLIC_SITE_URL = 'https://worldcup26.ir';
@@ -81,38 +98,53 @@ async function withServer(callback) {
 
 test('SEO routes serve unique HTML pages and a complete dynamic sitemap', async() => {
     await withServer(async baseUrl => {
-        const [home, league, country, sitemap, legacyLeague] = await Promise.all([
+        const [home, league, country, api, sitemap, robots, legacyLeague, uppercaseLeague] = await Promise.all([
             fetch(`${baseUrl}/`),
             fetch(`${baseUrl}/football/eng.1`),
             fetch(`${baseUrl}/football/country/england`),
+            fetch(`${baseUrl}/football-api`),
             fetch(`${baseUrl}/sitemap.xml`),
-            fetch(`${baseUrl}/?league=eng.1`, { redirect: 'manual' })
+            fetch(`${baseUrl}/robots.txt`),
+            fetch(`${baseUrl}/?league=eng.1`, { redirect: 'manual' }),
+            fetch(`${baseUrl}/football/ENG.1`, { redirect: 'manual' })
         ]);
-        const [homeHtml, leagueHtml, countryHtml, sitemapXml] = await Promise.all([
-            home.text(), league.text(), country.text(), sitemap.text()
+        const [homeHtml, leagueHtml, countryHtml, apiHtml, sitemapXml, robotsTxt] = await Promise.all([
+            home.text(), league.text(), country.text(), api.text(), sitemap.text(), robots.text()
         ]);
 
         assert.equal(home.status, 200);
         assert.match(home.headers.get('content-type'), /^text\/html/);
-        assert.match(homeHtml, /Football Live Scores, Fixtures &amp; Tables/);
+        assert.match(homeHtml, /Free Football Live Scores Today, Fixtures &amp; Results/);
         assert.match(homeHtml, /\/football\/eng\.1/);
+        assert.match(homeHtml, /Football live scores and fixtures today/);
 
         assert.equal(league.status, 200);
-        assert.match(leagueHtml, /Premier League Live Scores, Fixtures &amp; Table/);
+        assert.match(leagueHtml, /Premier League Live Scores Today, Fixtures &amp; Table/);
         assert.match(leagueHtml, /Arsenal/);
+        assert.match(leagueHtml, /Latest stored table/);
         assert.match(leagueHtml, /data-league-slug="eng\.1"/);
 
         assert.equal(country.status, 200);
-        assert.match(countryHtml, /England Football Live Scores &amp; Fixtures/);
+        assert.match(countryHtml, /England Football Live Scores Today &amp; Fixtures/);
         assert.match(countryHtml, /data-page-kind="country"/);
+
+        assert.equal(api.status, 200);
+        assert.match(apiHtml, /Free Football API for Live Scores, Fixtures &amp; Standings/);
+        assert.match(apiHtml, /No API key/);
 
         assert.equal(sitemap.status, 200);
         assert.match(sitemap.headers.get('content-type'), /^application\/xml/);
         assert.match(sitemapXml, /https:\/\/worldcup26\.ir\/football\/country\/england/);
         assert.match(sitemapXml, /https:\/\/worldcup26\.ir\/football\/esp\.1/);
+        assert.match(sitemapXml, /https:\/\/worldcup26\.ir\/football-api/);
+
+        assert.equal(robots.status, 200);
+        assert.match(robotsTxt, /Sitemap: https:\/\/worldcup26\.ir\/sitemap\.xml/);
 
         assert.equal(legacyLeague.status, 301);
         assert.equal(legacyLeague.headers.get('location'), '/football/eng.1');
+        assert.equal(uppercaseLeague.status, 301);
+        assert.equal(uppercaseLeague.headers.get('location'), '/football/eng.1');
     });
 });
 

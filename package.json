@@ -52,10 +52,13 @@
   "homepage": "https://worldcup26.ir",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rezarahiminia/worldcup2026.git"
+    "url": "git+https://github.com/rezarahiminia/livescoreFootball.git"
   },
   "bugs": {
-    "url": "https://github.com/rezarahiminia/worldcup2026/issues"
+    "url": "https://github.com/rezarahiminia/livescoreFootball/issues"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "dependencies": {
     "compression": "^1.8.1",
