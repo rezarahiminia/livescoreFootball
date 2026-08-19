@@ -1,6 +1,6 @@
 # Free Football Live Scores API — Premier League, LaLiga & More
 
-<a href="https://buymeacoffee.com/rahiminia" target="_blank" rel="noreferrer noopener"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me A Coffee" height="50"></a>
+<a href="https://www.buymeacoffee.com/rahiminia"><img src="https://img.buymeacoffee.com/button-api/?text=Buy me a coffee&emoji=&slug=rahiminia&button_colour=FFDD00&font_colour=000000&font_family=Arial&outline_colour=000000&coffee_colour=ffffff" /></a>
 
 An open-source, database-backed REST API and web score center for football live scores, today's fixtures, results, league tables, match summaries, play-by-play events, clubs and rosters.
 
