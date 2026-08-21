@@ -700,8 +700,10 @@ module.exports = app => {
         try {
             const [leagues, fallbackDate] = await Promise.all([availableLeagues(), latestSyncDate()]);
             const leagueSlugs = leagues.map(league => league.slug);
+            // Sorting on the _id index keeps pagination stable and avoids an
+            // in-memory sort as the match archive grows.
             const matches = await SoccerMatch.find({ league_slug: { $in: leagueSlugs } })
-                .sort({ date: -1, _id: 1 })
+                .sort({ _id: 1 })
                 .skip((page - 1) * SITEMAP_CHUNK)
                 .limit(SITEMAP_CHUNK)
                 .select('league_slug source home away last_synced_at')
