@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Live Football">
+  <rect width="64" height="64" rx="16" fill="#07101d"/>
+  <rect x="4" y="4" width="56" height="56" rx="13" fill="#173f35"/>
+  <circle cx="32" cy="32" r="15" fill="#54e0a1"/>
+  <path d="M32 17v9m0 12v9M17 32h9m12 0h9" stroke="#0b2a22" stroke-width="4" stroke-linecap="round" opacity=".55"/>
+</svg>

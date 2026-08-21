@@ -139,6 +139,21 @@ app.get('/assets/index.html', (req, res) => {
     return res.status(404).type('text/plain').send('Not found');
 });
 
+// Crawlers, browsers and social scrapers expect these at the site root.
+const ROOT_ASSETS = {
+    '/favicon.ico': 'favicon.ico',
+    '/favicon.svg': 'favicon.svg',
+    '/apple-touch-icon.png': 'apple-touch-icon.png',
+    '/apple-touch-icon-precomposed.png': 'apple-touch-icon.png',
+    '/og-image.png': 'og-image.png'
+};
+for (const [route, file] of Object.entries(ROOT_ASSETS)) {
+    app.get(route, (req, res) => {
+        res.set('Cache-Control', config.isProd ? 'public, max-age=604800' : 'no-store');
+        return res.sendFile(path.join(__dirname, 'public', file));
+    });
+}
+
 app.use('/assets', express.static(path.join(__dirname, 'public'), {
     index: false,
     maxAge: config.isProd ? '7d' : 0

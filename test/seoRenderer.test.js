@@ -133,3 +133,54 @@ test('unknown competition page does not leak template tokens', () => {
     assert.match(html, /data-page-kind="not-found"/);
     assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/);
 });
+
+test('club crests from the listener are limited to http(s) URLs', () => {
+    const render = logo => renderSeoPage(template, {
+        kind: 'club',
+        baseUrl: 'https://worldcup26.ir',
+        club: {
+            source: { club_id: '359' },
+            slug: 'eng.arsenal',
+            display_name: 'Arsenal',
+            abbreviation: 'ARS',
+            country: 'England',
+            logo
+        },
+        leagues: [premierLeague],
+        upcomingMatches: [],
+        recentMatches: [],
+        matchCount: 0
+    });
+
+    const safe = render('https://worldcup26.ir/media/clubs/arsenal.png');
+    assert.match(safe, /<img src="https:\/\/worldcup26\.ir\/media\/clubs\/arsenal\.png"/);
+
+    // A hostile scheme is dropped rather than rendered, and the badge falls back
+    // to the club abbreviation.
+    const hostile = render('javascript:alert(1)');
+    assert.doesNotMatch(hostile, /javascript:/);
+    assert.match(hostile, /class="club-badge-fallback"[^>]*>ARS</);
+});
+
+test('match pages escape club and venue names supplied by the listener', () => {
+    const evil = '<script>alert(1)</script>';
+    const html = renderSeoPage(template, {
+        kind: 'match',
+        baseUrl: 'https://worldcup26.ir',
+        league: premierLeague,
+        match: {
+            league_slug: 'eng.1',
+            source: { event_id: '401879322' },
+            date: new Date('2026-08-22T14:00:00.000Z'),
+            status: { state: 'pre' },
+            home: { source_id: '1', display_name: evil },
+            away: { source_id: '2', display_name: 'Liverpool' },
+            venue: { name: evil, city: 'London' }
+        },
+        events: [{ event_type: { name: 'Goal' }, text: evil, clock: { display_value: "23'" }, flags: { scoring_play: true } }],
+        headToHead: []
+    });
+
+    assert.doesNotMatch(html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, ''), /<script>alert/);
+    assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+});

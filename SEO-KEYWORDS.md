@@ -1,6 +1,6 @@
 # SEO keyword map for worldcup26.ir
 
-Last reviewed: 2026-08-19
+Last reviewed: 2026-08-22
 
 This document maps one search intent to one useful page. It deliberately avoids
 keyword stuffing: Google says unique titles, descriptions, crawlable links and
@@ -57,6 +57,32 @@ The autocomplete patterns reviewed in August 2026 repeatedly included `live
 scores today`, `fixtures`, `schedule`, `table`, `standings`, `results`, `stats`
 and `games`. They are covered as related intent, not repeated mechanically.
 
+## Priority 2b — long-tail match and club pages
+
+Every stored match and every club in a live competition now has its own page.
+These carry the highest-intent, lowest-competition queries in the vertical, and
+they are the fastest route to impressions on a young domain.
+
+| Route | Query pattern it answers |
+|---|---|
+| `/football/{league}/{home}-vs-{away}-{event-id}` | `arsenal vs liverpool live score`, `arsenal vs liverpool result`, `... lineups`, `... goals` |
+| `/football/club/{club-slug}` | `arsenal fixtures`, `arsenal results`, `arsenal next match`, `arsenal league position` |
+
+What keeps them out of thin-content territory:
+
+- A match page carries its own scoreline, kick-off time, venue, attendance, both
+  clubs' form, the goal/card/substitution timeline and previous meetings.
+- A club page carries its crest, city, stadium, current table position, points,
+  upcoming fixtures and recent results.
+- Match pages emit `SportsEvent` schema and club pages emit `SportsTeam`, so both
+  are eligible for sports rich results rather than plain blue links.
+- Unknown or renamed slugs `301` to the canonical URL; unresolvable ones return
+  `404` plus `noindex` so crawl budget is not spent on dead URLs.
+
+Internal linking is what gets them crawled: the home, country, league and club
+pages all link fixtures directly to their match pages, and match pages link back
+to both club pages and the league.
+
 ## Priority 3 — developer/API searches
 
 Use the GitHub README, Swagger descriptions and real code examples for:
@@ -112,6 +138,22 @@ Do not target `پخش زنده رایگان فوتبال` or English variants su
 football stream` unless the product actually provides licensed video. The current
 service provides free scores and match data, not video streaming.
 
+## GEO — answer engines
+
+The same pages serve AI answer engines, with two additions:
+
+1. `/llms.txt` states what the service is, what is free, the URL patterns and the
+   API quick reference, so a model can cite the site accurately without crawling
+   every page.
+2. `robots.txt` explicitly allows `GPTBot`, `OAI-SearchBot`, `ChatGPT-User`,
+   `ClaudeBot`, `Claude-User`, `PerplexityBot`, `Perplexity-User`,
+   `Google-Extended`, `Applebot-Extended` and `CCBot`, while keeping the JSON
+   endpoints out of scope. Being cited in AI answers is a growth channel here,
+   not a leak — the data is already free.
+
+Answer engines reward pages that state a fact plainly. Keep the `seo-facts`
+definition lists and the FAQ answers short, literal and free of hedging.
+
 ## On-page rules
 
 1. Keep one descriptive H1 and one unique title/description per page.
@@ -120,14 +162,25 @@ service provides free scores and match data, not video streaming.
 4. Link every country page to its leagues and every league page back to its country.
 5. Index active pages with useful data; return `404` plus `noindex` for unknown leagues.
 6. Do not make unsupported claims such as free video streaming.
+7. Every page needs an absolute `og:image`; social and answer-engine previews
+   drive click-through on brand-new domains.
+8. A club or match page whose competition is no longer live must `404` rather
+   than render an empty shell.
 
 ## After deployment
 
-1. Add `https://worldcup26.ir/sitemap.xml` to Google Search Console.
-2. Request indexing for `/`, `/football/eng.1` and `/football/esp.1` first.
+1. Submit `https://worldcup26.ir/sitemap.xml` in Google Search Console. It is now
+   a sitemap index; Search Console will discover the page, league, club and
+   match children from it. Submit it in Bing Webmaster Tools too.
+2. Request indexing for `/`, `/football/eng.1`, `/football/esp.1`,
+   `/football-api` and two or three live match pages first.
 3. Review queries, impressions, click-through rate and position every 28 days.
 4. Improve pages already ranking in positions 5–20 before creating new generic articles.
-5. Add match/team editorial pages only when each page can contain unique, useful data.
+5. Watch Search Console's "Crawled - currently not indexed" bucket. If match
+   pages accumulate there, the fix is more internal links and fewer near-empty
+   fixtures in the sitemap, not more pages.
+6. Validate one match page and one club page in Google's Rich Results Test after
+   each schema change.
 
 References: [Google SEO guide for developers](https://developers.google.com/search/docs/fundamentals/get-started-developers),
 [title links](https://developers.google.com/search/docs/appearance/title-link),
