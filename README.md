@@ -249,6 +249,8 @@ npm run test:soccer
 - Provider-specific IDs stay inside `source` fields; public league slugs remain stable.
 - API-key issuance and per-customer quotas are not implemented yet.
 
+<a href="https://www.buymeacoffee.com/rahiminia" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/v2/default-yellow.png" alt="Buy Me a Coffee" style="height: 60px !important;width: 217px !important;" ></a>
+
 ## License
 
 ISC
