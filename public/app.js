@@ -546,6 +546,8 @@
             const awayValue = awayStats.find(item => item.name === name)?.displayValue ?? '—';
             return `<div class="stat-row"><strong>${escapeHtml(homeValue)}</strong><span>${escapeHtml(statLabels[name] || name)}</span><strong>${escapeHtml(awayValue)}</strong></div>`;
         }).join('');
+        const availability = summary.meta?.dataAvailability || {};
+        const availabilityItem = (label, available, detail) => `<div class="availability-item ${available ? 'available' : 'unavailable'}"><strong>${label}</strong><span>${escapeHtml(detail)}</span></div>`;
 
         const scorerRows = scorers.map(goal => {
             const detail = [
@@ -600,9 +602,9 @@
                 <section class="detail-section full"><h3>Match timeline</h3><div class="timeline">${timeline || '<p class="detail-empty">No play-by-play events have been stored for this match yet.</p>'}</div></section>
                 <section class="detail-section full"><h3>Data availability</h3>
                     <div class="availability-grid">
-                        <div class="availability-item available"><strong>Match timeline</strong><span>Stored in soccer_match_events</span></div>
-                        <div class="availability-item available"><strong>Match goals</strong><span>Timeline and key_events</span></div>
-                        <div class="availability-item available"><strong>Statistics &amp; summary</strong><span>Stored in soccer_matches</span></div>
+                        ${availabilityItem('Match timeline', Boolean(availability.timeline?.available), availability.timeline?.available ? 'Stored events available' : 'No events currently stored')}
+                        ${availabilityItem('Match goals', Boolean(availability.matchGoals?.available), availability.matchGoals?.available ? 'Stored goal events available' : 'No goal events currently stored')}
+                        ${availabilityItem('Statistics &amp; summary', Boolean(availability.statisticsAndSummary?.available), availability.statisticsAndSummary?.available ? 'Stored statistics available' : 'No statistics currently stored')}
                         <div class="availability-item unavailable"><strong>League top scorers</strong><span>Not structurally stored; raw snapshots are internal</span></div>
                     </div>
                 </section>

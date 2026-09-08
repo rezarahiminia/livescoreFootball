@@ -86,7 +86,10 @@ test('scoreboard serializer returns provider-compatible status and competitors',
 });
 
 test('summary serializer exposes freshness without leaking source payload', () => {
-    const summary = serializeSummary(match, league);
+    const summary = serializeSummary(match, league, {
+        timelineAvailable: true,
+        goalsAvailable: false
+    });
 
     assert.equal(summary.header.league.slug, 'eng.1');
     assert.equal(summary.header.competitions[0].id, '900001');
@@ -94,8 +97,25 @@ test('summary serializer exposes freshness without leaking source payload', () =
     assert.equal(summary.meta.dataSource, 'database');
     assert.equal(summary.meta.lastSyncedAt, '2026-07-19T19:08:00.000Z');
     assert.equal(summary.meta.dataAvailability.timeline.available, true);
+    assert.equal(summary.meta.dataAvailability.matchGoals.available, false);
+    assert.equal(summary.meta.dataAvailability.statisticsAndSummary.available, true);
     assert.equal(summary.meta.dataAvailability.leagueTopScorers.available, false);
     assert.equal(summary.source_payload, undefined);
+});
+
+test('summary serializer does not claim data that is not stored', () => {
+    const summary = serializeSummary({
+        ...match,
+        home: { ...match.home, stats: undefined },
+        away: { ...match.away, stats: undefined }
+    }, league, {
+        timelineAvailable: false,
+        goalsAvailable: false
+    });
+
+    assert.equal(summary.meta.dataAvailability.timeline.available, false);
+    assert.equal(summary.meta.dataAvailability.matchGoals.available, false);
+    assert.equal(summary.meta.dataAvailability.statisticsAndSummary.available, false);
 });
 
 test('league serializer exposes database coverage', () => {

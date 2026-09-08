@@ -417,22 +417,57 @@ router.get('/:league/fixtures', validateLeague, async(req, res) => {
 
 async function sendSummary(req, res) {
     try {
-        const [league, match] = await Promise.all([
+        const [league, match, availability] = await Promise.all([
             getLeague(req.params.league),
             SoccerMatch.findOne({
                 league_slug: req.params.league,
                 'source.event_id': req.eventId
-            }).lean()
+            }).lean(),
+            getMatchEventAvailability(req.params.league, req.eventId)
         ]);
 
         if (!league) return res.status(404).json({ error: 'League not found' });
         if (!match) return res.status(404).json({ error: 'Match not found' });
 
         res.set('Cache-Control', `public, max-age=${match.status?.state === 'in' ? 4 : 30}`);
-        return res.json(serializeSummary(match, league));
+        return res.json(serializeSummary(match, league, availability));
     } catch (error) {
         return sendError(res, error);
     }
+}
+
+async function getMatchEventAvailability(league, eventId) {
+    const normalizedFilter = {
+        league_slug: league,
+        event_id: eventId,
+        valid: { $ne: false }
+    };
+    const listenerFilter = {
+        league_slug: league,
+        match_id: eventId,
+        valid: { $ne: false }
+    };
+    const normalizedCount = await SoccerMatchEvent.countDocuments(normalizedFilter);
+    const sourceFilter = normalizedCount > 0 ? normalizedFilter : listenerFilter;
+    const goalFilter = {
+        $and: [sourceFilter, {
+            $or: [
+                { 'flags.scoring_play': true },
+                { scoring_play: true }
+            ]
+        }]
+    };
+    const [timelineCount, goalCount] = await Promise.all([
+        normalizedCount > 0
+            ? Promise.resolve(normalizedCount)
+            : SoccerMatchEvent.countDocuments(sourceFilter),
+        SoccerMatchEvent.countDocuments(goalFilter)
+    ]);
+
+    return {
+        timelineAvailable: timelineCount > 0,
+        goalsAvailable: goalCount > 0
+    };
 }
 
 /**

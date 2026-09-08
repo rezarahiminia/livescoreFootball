@@ -223,10 +223,22 @@ function serializeScoreboardEvent(match) {
     };
 }
 
-function serializeSummary(match, league) {
+function serializeSummary(match, league, availability = {}) {
     const competition = serializeCompetition(match);
     const home = serializeCompetitor(match.home, 'home');
     const away = serializeCompetitor(match.away, 'away');
+    const keyEvents = match.key_events || [];
+    const hasKeyEventGoal = keyEvents.some(event => event?.scoringPlay
+        || event?.scoring_play
+        || event?.flags?.scoring_play);
+    const hasStats = stats => stats instanceof Map
+        ? stats.size > 0
+        : Boolean(stats && Object.keys(stats).length);
+    const timelineAvailable = Boolean(availability.timelineAvailable);
+    const goalsAvailable = availability.goalsAvailable === undefined
+        ? hasKeyEventGoal
+        : Boolean(availability.goalsAvailable || hasKeyEventGoal);
+    const statisticsAvailable = hasStats(match.home?.stats) || hasStats(match.away?.stats);
 
     return {
         header: {
@@ -252,7 +264,7 @@ function serializeSummary(match, league) {
                 }
             ]
         },
-        keyEvents: match.key_events || [],
+        keyEvents,
         rosters: match.lineups || [],
         gameInfo: {
             venue: serializeVenue(match.venue),
@@ -270,12 +282,12 @@ function serializeSummary(match, league) {
             provider: match.source.provider,
             lastSyncedAt: toIso(match.last_synced_at),
             dataAvailability: {
-                timeline: { available: true, storedIn: 'soccer_match_events' },
+                timeline: { available: timelineAvailable, storedIn: 'soccer_match_events' },
                 matchGoals: {
-                    available: true,
+                    available: goalsAvailable,
                     storedIn: ['soccer_match_events', 'soccer_matches.key_events']
                 },
-                statisticsAndSummary: { available: true, storedIn: 'soccer_matches' },
+                statisticsAndSummary: { available: statisticsAvailable, storedIn: 'soccer_matches' },
                 leagueTopScorers: {
                     available: false,
                     reason: 'Not structurally stored; raw snapshots are not exposed by the customer API.'

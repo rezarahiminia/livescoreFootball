@@ -313,7 +313,15 @@ function renderMatchTimeline(events) {
         const flags = event.flags || {};
         return flags.scoring_play || flags.yellow_card || flags.red_card || flags.substitution;
     });
-    if (!notable.length) return '';
+    if (!notable.length) {
+        return `<section class="seo-match-timeline" aria-labelledby="timeline-title">
+            <div class="seo-section-heading">
+                <p class="overline">Goals, cards and substitutions</p>
+                <h2 id="timeline-title">Match events</h2>
+            </div>
+            <p class="seo-empty">No goals, cards or substitutions are currently stored for this match.</p>
+        </section>`;
+    }
 
     const eventLabel = event => {
         const flags = event.flags || {};
@@ -385,7 +393,7 @@ function matchContent(context) {
         <div class="seo-section-heading">
             <h2 id="match-heading">${escapeHtml(home)} vs ${escapeHtml(away)} ${isFinished ? 'result and match details' : 'live score and match details'}</h2>
             <p>${isFinished
-                ? `${escapeHtml(home)} played ${escapeHtml(away)} in the ${escapeHtml(name)} on ${escapeHtml(formatMatchDate(match.date))}. The final score, goals, cards and substitutions are listed below.`
+                ? `${escapeHtml(home)} played ${escapeHtml(away)} in the ${escapeHtml(name)} on ${escapeHtml(formatMatchDate(match.date))}. The final score and any stored goals, cards or substitutions are shown below.`
                 : (isLive
                     ? `${escapeHtml(home)} vs ${escapeHtml(away)} is in progress in the ${escapeHtml(name)}. The score and match events update as the listener refreshes stored data.`
                     : `${escapeHtml(home)} host ${escapeHtml(away)} in the ${escapeHtml(name)} on ${escapeHtml(formatMatchDate(match.date))}. Follow the live score here once the match kicks off.`)}</p>
@@ -398,6 +406,7 @@ function matchContent(context) {
             <div><dt>Status</dt><dd>${escapeHtml(statusLabel)}</dd></div>
             ${match.attendance ? `<div><dt>Attendance</dt><dd>${escapeHtml(match.attendance.toLocaleString('en-GB'))}</dd></div>` : ''}
             ${match.season?.year ? `<div><dt>Season</dt><dd>${escapeHtml(seasonName(league))}</dd></div>` : ''}
+            ${match.last_synced_at ? `<div><dt>Data updated</dt><dd><time datetime="${escapeHtml(isoOrEmpty(match.last_synced_at))}">${escapeHtml(formatMatchDate(match.last_synced_at))} UTC</time></dd></div>` : ''}
         </dl>
 
         ${renderMatchTimeline(events)}
@@ -455,6 +464,7 @@ function clubContent(context) {
             ${standingRow?.rank ? `<div><dt>League position</dt><dd>${escapeHtml(ordinal(standingRow.rank))}</dd></div>` : ''}
             ${standingRow?.points != null ? `<div><dt>Points</dt><dd>${escapeHtml(standingRow.points)}</dd></div>` : ''}
             <div><dt>Stored matches</dt><dd>${escapeHtml(matchCount || 0)}</dd></div>
+            ${club.last_synced_at ? `<div><dt>Data updated</dt><dd><time datetime="${escapeHtml(isoOrEmpty(club.last_synced_at))}">${escapeHtml(formatMatchDate(club.last_synced_at))} UTC</time></dd></div>` : ''}
         </dl>
 
         <div class="seo-match-columns">
@@ -514,7 +524,7 @@ function homeContent(context) {
             <p>The score center and API are free to use. A dedicated listener refreshes normalized football records in MongoDB, while public requests read the stored data without waiting for an upstream provider.</p>
         </div>
         <div class="seo-topics faq-grid">
-            <article><h2>Are football scores updated live?</h2><p>Live match snapshots are refreshed by the listener. Every league and match response exposes stored status and freshness information so users can see what is currently available.</p></article>
+            <article><h2>Are football scores updated live?</h2><p>Live match snapshots are refreshed by the listener. Match pages and API metadata expose synchronization information so users can check what is currently stored.</p></article>
             <article><h2>Which football leagues are covered?</h2><p>Verified coverage includes the Premier League, EFL competitions, FA Cup, LaLiga, LaLiga 2, Copa del Rey and additional English and Spanish competitions.</p></article>
             <article><h2>Is the football API really free?</h2><p>Yes. The public read API currently requires no API key. Fair-use rate limits protect availability, and the complete source code is published on <a href="${GITHUB_URL}">GitHub</a>.</p></article>
         </div>
@@ -562,6 +572,7 @@ function leagueContent(context) {
             <div><dt>Country</dt><dd>${escapeHtml(country)}</dd></div>
             <div><dt>Season</dt><dd>${escapeHtml(season)}</dd></div>
             <div><dt>Stored matches</dt><dd>${escapeHtml(matchCount)}</dd></div>
+            ${league.last_synced_at ? `<div><dt>Data updated</dt><dd><time datetime="${escapeHtml(isoOrEmpty(league.last_synced_at))}">${escapeHtml(formatMatchDate(league.last_synced_at))} UTC</time></dd></div>` : ''}
         </dl>
         <div class="seo-match-columns">
             ${renderMatchList(`${name} upcoming fixtures`, upcomingMatches, { baseUrl, emptyMessage: `No upcoming ${name} fixtures are stored yet.` })}
@@ -585,7 +596,7 @@ function apiContent(context) {
             <div><dt>Price</dt><dd>Free</dd></div>
             <div><dt>Authentication</dt><dd>No API key</dd></div>
             <div><dt>Format</dt><dd>JSON REST</dd></div>
-            <div><dt>License</dt><dd>ISC</dd></div>
+            <div><dt>Source code license</dt><dd>ISC</dd></div>
         </dl>
         <div class="api-example-grid">
             <article><h2>Football fixtures API</h2><p>Browse a stored league schedule, filter by date or status, and paginate results.</p><code>GET /get/soccer/eng.1/fixtures?status=all</code></article>
@@ -676,15 +687,9 @@ function structuredData(context, canonical, description) {
             startDate: isoOrEmpty(match.date),
             eventStatus,
             eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode',
-            isAccessibleForFree: true,
             homeTeam,
             awayTeam,
-            competitor: [homeTeam, awayTeam],
-            superEvent: {
-                '@type': 'SportsOrganization',
-                name,
-                url: leagueUrl(context.baseUrl, league)
-            }
+            competitor: [homeTeam, awayTeam]
         };
         if (match.venue?.name) {
             sportsEvent.location = {
@@ -697,8 +702,6 @@ function structuredData(context, canonical, description) {
                 }
             };
         }
-        if (match.attendance) sportsEvent.maximumAttendeeCapacity = match.attendance;
-
         return {
             '@context': 'https://schema.org',
             '@graph': [
@@ -774,6 +777,7 @@ function structuredData(context, canonical, description) {
                     description,
                     isPartOf: { '@id': `${context.baseUrl}/#website` },
                     mainEntity: { '@id': `${canonical}#team` },
+                    dateModified: isoOrEmpty(club.last_synced_at) || undefined,
                     inLanguage: 'en'
                 },
                 sportsTeam,
@@ -817,8 +821,7 @@ function structuredData(context, canonical, description) {
                     description,
                     url: canonical,
                     isAccessibleForFree: true,
-                    creator: { '@id': `${context.baseUrl}/#organization` },
-                    license: 'https://opensource.org/licenses/ISC',
+                    dateModified: isoOrEmpty(context.league.last_synced_at) || undefined,
                     distribution: [{
                         '@type': 'DataDownload',
                         encodingFormat: 'application/json',
@@ -940,10 +943,10 @@ function pageMetadata(context) {
             ? `${home} ${homeScore}-${awayScore} ${away} — ${name} Result`
             : `${home} vs ${away} Live Score — ${name}`;
         const description = isFinished && hasScore
-            ? `${home} ${homeScore}-${awayScore} ${away} in the ${name} on ${formatMatchDate(match.date)}. Full-time result, goals, cards and substitutions, free to view.`
+            ? `${home} ${homeScore}-${awayScore} ${away} in the ${name} on ${formatMatchDate(match.date)}. Full-time result and stored match events, free to view.`
             : (isLive
-                ? `${home} vs ${away} live score in the ${name}. Current match state, goals, cards and substitutions as stored data refreshes.`
-                : `${home} vs ${away} in the ${name} kicks off ${formatMatchDate(match.date)}. Live score, match events and lineups, free to view.`);
+                ? `${home} vs ${away} live score in the ${name}. Current match state and available events as stored data refreshes.`
+                : `${home} vs ${away} in the ${name} kicks off ${formatMatchDate(match.date)}. Live score and stored match events, free to view.`);
 
         return {
             title,

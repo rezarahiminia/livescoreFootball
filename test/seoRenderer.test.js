@@ -85,6 +85,7 @@ test('league page has unique intent, breadcrumb, fixtures and escaped match cont
     assert.doesNotMatch(html, /Arsenal <FC>/);
     assert.match(html, /"@type":"Dataset"/);
     assert.match(html, /"@type":"BreadcrumbList"/);
+    assert.doesNotMatch(html, /opensource\.org\/licenses\/ISC/);
     assert.match(html, /<caption>Premier League<\/caption>/);
     assert.match(html, /<caption>Championship Group<\/caption>/);
     assert.doesNotMatch(html, /\{\{[A-Z_]+\}\}/);
@@ -183,4 +184,27 @@ test('match pages escape club and venue names supplied by the listener', () => {
 
     assert.doesNotMatch(html.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/, ''), /<script>alert/);
     assert.match(html, /&lt;script&gt;alert\(1\)&lt;\/script&gt;/);
+});
+
+test('match pages state when no timeline events are stored', () => {
+    const html = renderSeoPage(template, {
+        kind: 'match',
+        baseUrl: 'https://worldcup26.ir',
+        league: premierLeague,
+        match: {
+            league_slug: 'eng.1',
+            source: { event_id: '401879322' },
+            date: new Date('2026-08-22T14:00:00.000Z'),
+            last_synced_at: new Date('2026-08-22T13:55:00.000Z'),
+            status: { state: 'pre' },
+            home: { source_id: '1', display_name: 'Arsenal' },
+            away: { source_id: '2', display_name: 'Liverpool' }
+        },
+        events: [],
+        headToHead: []
+    });
+
+    assert.match(html, /No goals, cards or substitutions are currently stored/);
+    assert.match(html, /<dt>Data updated<\/dt>/);
+    assert.doesNotMatch(html, /match events and lineups/i);
 });

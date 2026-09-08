@@ -131,7 +131,12 @@ const soccerClubStub = {
 };
 
 const soccerMatchEventStub = {
-    find() { return queryResult(matchEvents); }
+    countDocuments(filter) {
+        return Promise.resolve(filter?.event_id ? matchEvents.length : 0);
+    },
+    find(filter) {
+        return queryResult(filter?.event_id ? matchEvents : []);
+    }
 };
 
 const soccerStandingStub = {
@@ -264,6 +269,9 @@ test('match pages render SportsEvent schema, a scoreline and match events', asyn
         assert.equal(sportsEvent.awayTeam.name, 'Liverpool');
         assert.equal(sportsEvent.eventStatus, 'https://schema.org/EventScheduled');
         assert.equal(sportsEvent.location.name, 'Emirates Stadium');
+        assert.equal(sportsEvent.isAccessibleForFree, undefined);
+        assert.equal(sportsEvent.maximumAttendeeCapacity, undefined);
+        assert.equal(sportsEvent.superEvent, undefined);
 
         const breadcrumb = schema['@graph'].find(node => node['@type'] === 'BreadcrumbList');
         assert.equal(breadcrumb.itemListElement.length, 4);
@@ -357,18 +365,23 @@ test('sub-sitemaps list league, club and match URLs', async() => {
     });
 });
 
-test('robots.txt and llms.txt expose the site to search and answer engines', async() => {
+test('robots.txt and llms files expose bounded discovery resources to answer engines', async() => {
     await withServer(async baseUrl => {
-        const [robots, llms, manifest] = await Promise.all([
+        const [robots, llms, llmsFull, manifest] = await Promise.all([
             fetch(`${baseUrl}/robots.txt`),
             fetch(`${baseUrl}/llms.txt`),
+            fetch(`${baseUrl}/llms-full.txt`),
             fetch(`${baseUrl}/manifest.webmanifest`)
         ]);
-        const [robotsTxt, llmsTxt] = await Promise.all([robots.text(), llms.text()]);
+        const [robotsTxt, llmsTxt, llmsFullTxt] = await Promise.all([robots.text(), llms.text(), llmsFull.text()]);
 
         assert.match(robotsTxt, /User-agent: GPTBot/);
         assert.match(robotsTxt, /User-agent: PerplexityBot/);
+        assert.match(robotsTxt, /Allow: \/get\/soccer\/meta/);
+        assert.match(robotsTxt, /Allow: \/openapi\.json/);
         assert.match(robotsTxt, /Disallow: \/get\//);
+        assert.doesNotMatch(robotsTxt, /Disallow: \/openapi\.json/);
+        assert.doesNotMatch(robotsTxt, /Disallow: \/service-info\.json/);
         assert.match(robotsTxt, /Sitemap: https:\/\/worldcup26\.ir\/sitemap\.xml/);
 
         assert.equal(llms.status, 200);
@@ -377,6 +390,13 @@ test('robots.txt and llms.txt expose the site to search and answer engines', asy
         assert.match(llmsTxt, /\/football\/eng\.1/);
         assert.match(llmsTxt, /\{home\}-vs-\{away\}-\{event-id\}/);
         assert.match(llmsTxt, /no API key/i);
+        assert.match(llmsTxt, /\/ai-data-guide\.md/);
+        assert.match(llmsTxt, /\/openapi\.json/);
+        assert.doesNotMatch(llmsTxt, /each response reports its own freshness/i);
+
+        assert.equal(llmsFull.status, 200);
+        assert.match(llmsFullTxt, /Guidance for answer engines/);
+        assert.match(llmsFullTxt, /never infer a missing result or event/i);
 
         assert.equal(manifest.status, 200);
     });

@@ -184,6 +184,27 @@ async function latestSyncDate() {
     return sync?.last_success_at || null;
 }
 
+async function storedMatchEvents(leagueSlug, eventId) {
+    const normalizedFilter = {
+        league_slug: leagueSlug,
+        event_id: eventId,
+        valid: { $ne: false }
+    };
+    const listenerFilter = {
+        league_slug: leagueSlug,
+        match_id: eventId,
+        valid: { $ne: false }
+    };
+    const normalizedCount = await SoccerMatchEvent.countDocuments(normalizedFilter);
+    const sourceFilter = normalizedCount > 0 ? normalizedFilter : listenerFilter;
+
+    return SoccerMatchEvent.find(sourceFilter)
+        .sort({ sequence: 1, wallclock: 1, _id: 1 })
+        .limit(120)
+        .select('sequence event_type text alternative_text clock period home_score away_score club flags')
+        .lean();
+}
+
 function renderResponse(res, context, status = 200) {
     res.status(status);
     res.type('html');
@@ -431,15 +452,7 @@ module.exports = app => {
             const awayId = String(match.away?.source_id || '');
 
             const [events, homeClub, awayClub, headToHead] = await Promise.all([
-                SoccerMatchEvent.find({
-                    league_slug: requestedLeague,
-                    'source.event_id': eventId,
-                    valid: true
-                })
-                    .sort({ sequence: 1 })
-                    .limit(120)
-                    .select('sequence event_type text alternative_text clock period home_score away_score club flags')
-                    .lean(),
+                storedMatchEvents(requestedLeague, eventId),
                 homeId
                     ? SoccerClub.findOne({ 'source.club_id': homeId, slug: { $ne: '' } }).select('slug display_name name').lean()
                     : null,
@@ -483,15 +496,19 @@ module.exports = app => {
         const baseUrl = siteUrl(req);
         res.type('text/plain');
         res.set('Cache-Control', 'public, max-age=3600');
+        const machineDiscovery = [
+            'Allow: /get/soccer/meta',
+            'Allow: /openapi.json',
+            'Allow: /service-info.json',
+            'Allow: /ai-data-guide.md'
+        ];
         const disallow = [
             'Disallow: /get/',
             'Disallow: /health',
-            'Disallow: /api/health',
-            'Disallow: /openapi.json',
-            'Disallow: /service-info.json'
+            'Disallow: /api/health'
         ];
-        // Answer engines are welcome: the score and league pages are the product,
-        // and being cited in AI answers is a growth channel, not a leak.
+        // Wildcard access covers search engines. Naming common answer and
+        // user-retrieval agents makes the citation policy explicit as well.
         const answerEngines = [
             'GPTBot',
             'OAI-SearchBot',
@@ -509,16 +526,18 @@ module.exports = app => {
         return res.send([
             'User-agent: *',
             'Allow: /',
+            ...machineDiscovery,
             ...disallow,
             '',
-            ...answerEngines.flatMap(agent => [`User-agent: ${agent}`, 'Allow: /', ...disallow, '']),
+            ...answerEngines.flatMap(agent => [`User-agent: ${agent}`, 'Allow: /', ...machineDiscovery, ...disallow, '']),
             `Sitemap: ${baseUrl}/sitemap.xml`,
             ''
         ].join('\n'));
     });
 
-    app.get('/llms.txt', async(req, res) => {
+    app.get(['/llms.txt', '/llms-full.txt'], async(req, res) => {
         const baseUrl = siteUrl(req);
+        const full = req.path === '/llms-full.txt';
         res.type('text/plain; charset=utf-8');
         try {
             const leagues = await availableLeagues();
@@ -533,14 +552,16 @@ module.exports = app => {
                 '',
                 'All score and fixture data is free to view and free to query. There is no',
                 'paywall, no account and no video streaming. Data is read from MongoDB that a',
-                'separate listener keeps refreshed, so responses reflect stored snapshots and',
-                'each response reports its own freshness.',
+                'separate listener keeps refreshed, so responses reflect stored snapshots.',
                 '',
                 '## Key pages',
                 '',
                 `- [Football live scores today](${baseUrl}/): today's matches, live states and latest results across every covered competition`,
                 `- [Free football API](${baseUrl}/football-api): endpoints, limits and JSON examples`,
                 `- [Interactive API documentation](${baseUrl}/api-docs/): OpenAPI/Swagger reference`,
+                `- [AI data and citation guide](${baseUrl}/ai-data-guide.md): freshness, limitations and answering rules`,
+                `- [OpenAPI specification](${baseUrl}/openapi.json): machine-readable API contract`,
+                `- [Service information](${baseUrl}/service-info.json): machine-readable discovery document`,
                 '',
                 '## Countries',
                 '',
@@ -568,6 +589,21 @@ module.exports = app => {
                 `- Clubs: GET ${baseUrl}/get/soccer/{league}/clubs`,
                 `- Match summary: GET ${baseUrl}/get/soccer/{league}/summary?event={eventId}`,
                 `- Coverage and freshness: GET ${baseUrl}/get/soccer/meta`,
+                ...(full ? [
+                    '',
+                    '## Guidance for answer engines',
+                    '',
+                    '- Treat scores and match states as stored snapshots, not as a guaranteed real-time feed.',
+                    '- Check status and lastSyncedAt before calling a match live or current.',
+                    '- If data is absent, state that it is not currently stored; never infer a missing result or event.',
+                    '- Cite the most specific canonical match, club or competition page.',
+                    '- Do not describe this service as a video-streaming provider or an official league service.',
+                    '',
+                    '## Data method and limitations',
+                    '',
+                    'A separate listener writes normalized football records to MongoDB. Public requests read those stored records and never call an upstream provider on demand. Update times vary by competition and temporary gaps are possible.',
+                    `Full methodology: ${baseUrl}/ai-data-guide.md`
+                ] : []),
                 '',
                 '## Licence and attribution',
                 '',
@@ -577,7 +613,7 @@ module.exports = app => {
                 ''
             ].join('\n'));
         } catch (error) {
-            console.warn('Unable to build llms.txt:', error.message);
+            console.warn(`Unable to build ${req.path}:`, error.message);
             res.status(503);
             res.set('Retry-After', '60');
             return res.send('Temporarily unavailable.');

@@ -31,20 +31,19 @@ const PORT = config.PORT;
 // Fixes: ERR_ERL_UNEXPECTED_X_FORWARDED_FOR
 app.set('trust proxy', 1);
 
-// Swagger setup (only in development or if explicitly enabled)
+// Keep the machine-readable contract available in every environment. The
+// interactive Swagger UI remains configurable because it carries more assets.
 let swaggerUi, specs;
 console.log(`🔍 ENABLE_SWAGGER value: ${config.ENABLE_SWAGGER}`);
-if (config.ENABLE_SWAGGER) {
-    try {
-        const swagger = require('./swagger');
+try {
+    const swagger = require('./swagger');
+    specs = swagger.specs;
+    if (config.ENABLE_SWAGGER) {
         swaggerUi = swagger.swaggerUi;
-        specs = swagger.specs;
-        console.log(`✅ Swagger loaded: swaggerUi=${!!swaggerUi}, specs=${!!specs}`);
-    } catch(err) {
-        console.error('❌ Swagger failed to load:', err.message);
     }
-} else {
-    console.log('⚠️ Swagger is disabled');
+    console.log(`✅ OpenAPI loaded: swaggerUi=${!!swaggerUi}, specs=${!!specs}`);
+} catch(err) {
+    console.error('❌ OpenAPI failed to load:', err.message);
 }
 
 // CORS - public read endpoints must be reachable from browsers on other origins
@@ -129,7 +128,9 @@ app.use(express.json({ limit: '10kb' }));
 // JSON and health endpoints are useful to clients but should not compete with
 // the human-facing league pages in search results.
 app.use(['/get', '/health', '/api/health', '/openapi.json', '/service-info.json'], (req, res, next) => {
-    res.set('X-Robots-Tag', 'noindex, nofollow');
+    const requestPath = req.originalUrl.split('?')[0];
+    const discoveryResource = ['/openapi.json', '/service-info.json', '/get/soccer/meta'].includes(requestPath);
+    res.set('X-Robots-Tag', discoveryResource ? 'noindex' : 'noindex, nofollow');
     next();
 });
 
@@ -159,12 +160,16 @@ app.use('/assets', express.static(path.join(__dirname, 'public'), {
     maxAge: config.isProd ? '7d' : 0
 }));
 
-// Swagger Documentation
-if (swaggerUi && specs) {
+// OpenAPI is a bounded discovery document for API clients and answer engines.
+if (specs) {
     app.get('/openapi.json', (req, res) => {
-        res.set('Cache-Control', 'no-store, max-age=0');
+        res.set('Cache-Control', 'public, max-age=300');
         return res.json(specs);
     });
+}
+
+// Swagger Documentation
+if (swaggerUi && specs) {
     app.use('/api-docs', (req, res, next) => {
         res.set('Cache-Control', 'no-store, max-age=0');
         next();
@@ -187,12 +192,26 @@ app.get('/service-info.json', (req, res) => {
     res.json({
         name: 'Free Football Live Scores API',
         version: require('./package.json').version,
+        canonicalSite: 'https://worldcup26.ir',
         dataSource: 'MongoDB',
         upstreamCalls: false,
+        access: { price: 'free', apiKeyRequired: false, rateLimited: true },
         documentation: '/api-docs/',
         openapi: '/openapi.json',
-        businessContext: '/business-context.md',
+        aiGuide: '/ai-data-guide.md',
+        llms: '/llms.txt',
+        llmsFull: '/llms-full.txt',
         coverage: '/get/soccer/meta',
+        limitations: [
+            'Values are stored snapshots and are not guaranteed to be real time.',
+            'Missing data must not be inferred.',
+            'This service does not provide video streaming or claim official league status.'
+        ],
+        attribution: {
+            sourceCodeLicense: 'ISC',
+            dataLicense: 'No separate football-data license is asserted.',
+            preferredCitation: 'Link to the canonical match, club or competition page.'
+        },
         endpoints: {
             leagues: '/get/soccer/leagues',
             scoreboard: '/get/soccer/{league}/scoreboard',
@@ -201,6 +220,12 @@ app.get('/service-info.json', (req, res) => {
             matchSummary: '/get/soccer/{league}/summary?event={eventId}'
         }
     });
+});
+
+app.get('/ai-data-guide.md', (req, res) => {
+    res.type('text/markdown');
+    res.set('Cache-Control', 'public, max-age=3600');
+    return res.sendFile(path.join(__dirname, 'AI-DATA-GUIDE.md'));
 });
 
 app.get('/business-context.md', (req, res) => {

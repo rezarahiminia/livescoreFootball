@@ -1,30 +1,29 @@
 const swaggerJsdoc = require('swagger-jsdoc');
 const swaggerUi = require('swagger-ui-express');
+const packageJson = require('./package.json');
+
+const publicUrl = String(process.env.PUBLIC_SITE_URL || process.env.API_URL || 'http://localhost:3050').replace(/\/$/, '');
 
 const options = {
   definition: {
     openapi: '3.0.0',
     info: {
       title: 'Free Football Live Scores API',
-      version: '2.0.0',
-      description: 'Open-source JSON football API for Premier League, LaLiga and expanding multi-country coverage. Read fixtures, live score snapshots, results, tables, clubs, match summaries, play-by-play and rosters from a database-backed REST service. Customer requests never call the upstream provider directly. Use GET /get/soccer/meta to inspect current coverage.',
-      license: {
-        name: 'ISC',
-        url: 'https://opensource.org/licenses/ISC'
-      },
+      version: packageJson.version,
+      description: 'Open-source JSON football API for Premier League, LaLiga and expanding multi-country coverage. Read stored fixtures, live score snapshots, results, tables, clubs, match summaries, play-by-play and rosters from a database-backed REST service. Requests never call the upstream provider directly. Values are stored snapshots; use GET /get/soccer/meta to inspect current coverage and synchronization time. The repository source code is ISC licensed; no separate license for third-party football data is asserted.',
       contact: {
         name: 'Free Football Live Scores',
         url: 'https://github.com/rezarahiminia/livescoreFootball/issues'
       }
     },
     externalDocs: {
-      description: 'Business context, product boundaries, capability status, and AI contributor rules',
-      url: `${String(process.env.API_URL || 'http://localhost:3050').replace(/\/$/, '')}/business-context.md`
+      description: 'Football data freshness, limitations and citation guide for AI assistants',
+      url: `${publicUrl}/ai-data-guide.md`
     },
     servers: [
       {
-        url: process.env.API_URL || 'http://localhost:3050',
-        description: process.env.API_URL ? 'Configured server' : 'Development server'
+        url: publicUrl,
+        description: process.env.PUBLIC_SITE_URL || process.env.API_URL ? 'Configured server' : 'Development server'
       }
     ],
     tags: [
