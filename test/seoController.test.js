@@ -135,7 +135,7 @@ const soccerMatchEventStub = {
         return Promise.resolve(filter?.event_id ? matchEvents.length : 0);
     },
     find(filter) {
-        return queryResult(filter?.event_id ? matchEvents : []);
+        return queryResult(filter?.$and?.[0]?.event_id ? matchEvents : []);
     }
 };
 

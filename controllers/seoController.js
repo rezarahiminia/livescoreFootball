@@ -197,8 +197,23 @@ async function storedMatchEvents(leagueSlug, eventId) {
     };
     const normalizedCount = await SoccerMatchEvent.countDocuments(normalizedFilter);
     const sourceFilter = normalizedCount > 0 ? normalizedFilter : listenerFilter;
+    const notableFilter = {
+        $or: [
+            { 'event_type.name': /^substitution$/i },
+            { 'event_type.type': /^substitution$/i },
+            { 'event_type.text': /^substitution$/i },
+            { 'flags.scoring_play': true },
+            { 'flags.yellow_card': true },
+            { 'flags.red_card': true },
+            { 'flags.substitution': true },
+            { scoring_play: true },
+            { yellow_card: true },
+            { red_card: true },
+            { substitution: true }
+        ]
+    };
 
-    return SoccerMatchEvent.find(sourceFilter)
+    return SoccerMatchEvent.find({ $and: [sourceFilter, notableFilter] })
         .sort({ sequence: 1, wallclock: 1, _id: 1 })
         .limit(120)
         .select('sequence event_type text alternative_text clock period home_score away_score club flags')
